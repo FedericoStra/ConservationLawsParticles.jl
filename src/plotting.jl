@@ -3,7 +3,7 @@ using Plots
 function plot_density!(p, x; kwargs...)
     X = Array{eltype(x)}(undef, 2*length(x)-2)
     Y = Array{Float64}(undef, 2*length(x)-2)
-    R = density(x)
+    R = pwc_density(x)
     X[1] = x[1]
     for i in 2:length(x)-1
         X[2i-2] = X[2i-1] = x[i]
@@ -21,6 +21,6 @@ end
 
 function plot_linear_density!(p, x; kwargs...)
     X = (x[1:end-1] + x[2:end]) / 2
-    Y = density(x)[2:end-1]
+    Y = pwc_density(x)[2:end-1]
     plot!(p, X, Y; kwargs...)
 end
