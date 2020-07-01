@@ -11,4 +11,6 @@ julia> empty_like([1 2 3; 4 5 6])
  1                3  140456850103041
 ```
 """
-empty_like(x::AbstractArray) = Array{eltype(x)}(undef, size(x))
+function empty_like end
+@deprecate empty_like(x::AbstractArray) similar(x)
+# empty_like(x::AbstractArray) = Array{eltype(x)}(undef, size(x))
