@@ -11,3 +11,8 @@ end
     @test pwc_density([0., 1.]) == [0.0, 1.0, 0.0]
     @test pwc_density([0.]) == [0.0, 0.0]
 end
+
+@testset "pwc_densities" begin
+    xs = ([0., 1., 2.], [0., 1., 2., 3.])
+    @test pwc_density(xs...) == pwc_densities(xs...)
+end

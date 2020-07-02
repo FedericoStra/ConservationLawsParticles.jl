@@ -6,7 +6,7 @@ include("densities.jl")
 include("utils.jl")
 include("plotting.jl")
 
-export empty_like, pwc_density
+export empty_like, pwc_density, pwc_densities
 export plot_density, plot_density!, plot_linear_density!
 
 export make_velocity
