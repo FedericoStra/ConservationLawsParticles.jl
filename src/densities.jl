@@ -22,7 +22,7 @@ julia> pwc_density([0, 1, 3])
  0.0
 ```
 """
-function pwc_density(x::AbstractVector)
+function pwc_density(x::AbstractVector{<:Real})
     len = length(x)
     R = Array{float(eltype(x))}(undef, len+1)
     R[1] = R[end] = 0
@@ -38,7 +38,7 @@ end
 
 The returned `x_dens` is indexed as `x_dens[x_or_y, left_or_right, i]`.
 """
-function pwc_density(x::AbstractVector, y::AbstractVector)
+function pwc_density(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
     x_len, y_len = length(x), length(y)
     T = promote_type(float(eltype(x)), float(eltype(y)))
     x_dens = Array{T, 3}(undef, (2, 2, x_len))
@@ -113,7 +113,7 @@ end
 """
     pwc_densities(xs::AbstractVector...)
 """
-function pwc_densities(xs::Vararg{AbstractVector, N}) where N
+function pwc_densities(xs::Vararg{AbstractVector{<:Real}, N}) where N
     N::Int
     T = promote_type(float.(eltype.(xs))...)
     len = length.(xs)
