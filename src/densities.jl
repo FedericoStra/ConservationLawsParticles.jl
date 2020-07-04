@@ -118,8 +118,11 @@ function pwc_densities(xs::Vararg{AbstractVector{<:Real}, N}) where N
     T = promote_type(float.(eltype.(xs))...)
     len = length.(xs)
     dens = map(x -> new_undef_densities(T, N, length(x)), xs)::NTuple{N, Array{T, 3}}
+    # indices of current particles being examined
     ind = ones(Int, N)
+    # current densities
     ds = zeros(T, N)
+    # normalization factors
     fs::NTuple{N, T} = 1 ./ (len .- 1)
     # @debug "Entering loop" T len ds fs
     while true
