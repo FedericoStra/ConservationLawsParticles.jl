@@ -46,26 +46,29 @@ function make_velocities(
             for i in 1:length(x.x[spec])
                 v::eltype(dx.x[1]) = 0
                 # self-interaction with `spec`
+                local Wprime = Wprimes[spec][spec]
                 for j in 1:i-1
-                    v += Wprimes[spec][spec](x.x[spec][j] - x.x[spec][i])
+                    v += Wprime(x.x[spec][j] - x.x[spec][i])
                 end
                 for j in i+1:length(x.x[spec])
-                    v += Wprimes[spec][spec](x.x[spec][j] - x.x[spec][i])
+                    v += Wprime(x.x[spec][j] - x.x[spec][i])
                 end
                 v /= length(x.x[spec])
                 # interaction with `other < spec`
                 for other in 1:spec-1
+                    local Wprime = Wprimes[spec][other]
                     local w::eltype(dx.x[1]) = 0
                     for j in 1:length(x.x[other])
-                        w += Wprimes[spec][other](x.x[other][j] - x.x[spec][i])
+                        w += Wprime(x.x[other][j] - x.x[spec][i])
                     end
                     v += w / length(x.x[other])
                 end
                 # interaction with `other > spec`
                 for other in spec+1:N
+                    local Wprime = Wprimes[spec][other]
                     local w::eltype(dx.x[1]) = 0
                     for j in 1:length(x.x[other])
-                        w += Wprimes[spec][other](x.x[other][j] - x.x[spec][i])
+                        w += Wprime(x.x[other][j] - x.x[spec][i])
                     end
                     v += w / length(x.x[other])
                 end
