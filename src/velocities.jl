@@ -72,9 +72,9 @@ function make_velocities(
                 # external velocity
                 v += Vs[spec](x[i])
                 if v < 0
-                    mob = mobilities[spec](dens[spec][spec, 1, i])
+                    mob = mobilities[spec](dens[spec][:, 1, i]...)
                 else
-                    mob = mobilities[spec](dens[spec][spec, 2, i])
+                    mob = mobilities[spec](dens[spec][:, 2, i]...)
                 end
                 dx.x[spec][i] = v * mob
             end
