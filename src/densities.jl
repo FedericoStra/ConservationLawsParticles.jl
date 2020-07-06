@@ -50,7 +50,7 @@ function pwc_density(x::AbstractVector{<:Real}, y::AbstractVector{<:Real})
     # normalization factors
     x_f::T, y_f::T = 1 / (x_len - 1), 1 / (y_len - 1)
     # @debug "Entering loop" x_len y_len
-    while x_i <= x_len || y_i <= y_len
+    @inbounds while x_i <= x_len || y_i <= y_len
         if y_i > y_len || x_i <= x_len && x[x_i] < y[y_i]
             # @debug "Iteration x < y" x_i y_i
             x_dens[1, 1, x_i] = x_d
@@ -125,28 +125,36 @@ function pwc_densities(xs::Vararg{AbstractVector{<:Real}, N}) where N
     # normalization factors
     fs::NTuple{N, T} = 1 ./ (len .- 1)
     # @debug "Entering loop" T len ds fs
+    i_min = Int[0]
     while true
-        i_min = Int[]
+        n_mins::Int = 0
         for i in 1:N
             if ind[i] <= len[i]
-                if isempty(i_min) || xs[i][ind[i]] < xs[i_min[1]][ind[i_min[1]]]
-                    i_min = [i]
+                if n_mins == 0 || xs[i][ind[i]] < xs[i_min[1]][ind[i_min[1]]]
+                    i_min[1] = i
+                    n_mins = 1
                 elseif xs[i][ind[i]] <= xs[i_min[1]][ind[i_min[1]]]
-                    push!(i_min, i)
+                    if n_mins < length(i_min)
+                        i_min[n_mins] = i
+                    else
+                        push!(i_min, i)
+                    end
+                    n_mins += 1
                 end
             end
         end
-        if isempty(i_min)
+        if n_mins == 0
             break
         end
         # let ind = (ind...,), i_min = (i_min...,)
         #     @debug "Iteration" ind i_min
         # end
-        for i in i_min
+        i_mins = @view i_min[1:n_mins]
+        for i in i_mins
             # @debug "Assigning left" i ind[i] ds
             dens[i][:, 1, ind[i]] .= ds
         end
-        for i in i_min
+        for i in i_mins
             if ind[i] < length(xs[i])
                 ds[i] = fs[i] / (xs[i][ind[i]+1] - xs[i][ind[i]])
             else
@@ -154,11 +162,14 @@ function pwc_densities(xs::Vararg{AbstractVector{<:Real}, N}) where N
             end
             # ds[i] = right_local_density(xs[i], ind[i], fs[i])
         end
-        for i in i_min
+        for i in i_mins
             # @debug "Assigning right" i ind[i] ds
             dens[i][:, 2, ind[i]] .= ds
         end
-        ind[i_min] .+= 1
+        # ind[i_mins] .+= 1
+        for i in i_mins
+            ind[i] += 1
+        end
     end
     dens
 end
