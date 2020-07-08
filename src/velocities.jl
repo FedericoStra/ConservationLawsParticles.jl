@@ -116,7 +116,7 @@ function make_velocities(
         dens = pwc_densities(x.x...)
         for spec in 1:N
             for i in 1:length(x.x[spec])
-                v::F = Vs[spec](x[i])
+                v::F = Vs[spec](x.x[spec][i])
                 for other in 1:N
                     v += total_interaction(Wprimes[spec][other], x.x[other], x.x[spec][i])
                 end
