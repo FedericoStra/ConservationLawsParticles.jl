@@ -134,22 +134,22 @@ function pwc_densities(xs::Vararg{AbstractVector{<:Real}, N}) where N
                     i_min[1] = i
                     n_mins = 1
                 elseif xs[i][ind[i]] <= xs[i_min[1]][ind[i_min[1]]]
-                    if n_mins < length(i_min)
+                    n_mins += 1
+                    if n_mins <= length(i_min)
                         i_min[n_mins] = i
                     else
                         push!(i_min, i)
                     end
-                    n_mins += 1
                 end
             end
         end
         if n_mins == 0
             break
         end
-        # let ind = (ind...,), i_min = (i_min...,)
-        #     @debug "Iteration" ind i_min
-        # end
         i_mins = @view i_min[1:n_mins]
+        # let ind = (ind...,), i_min = (i_min...,), i_mins = (i_mins...,)
+        #     @debug "Iteration" ind i_min n_mins i_mins
+        # end
         for i in i_mins
             # @debug "Assigning left" i ind[i] ds
             dens[i][:, 1, ind[i]] .= ds
