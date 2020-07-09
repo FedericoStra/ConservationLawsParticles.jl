@@ -201,3 +201,109 @@ function param_velocities2(
         end
     end
 end
+
+export gen_velocities
+@generated function gen_velocities(
+    dx::ArrayPartition{F, T},
+    x::ArrayPartition{F, T},
+    p::Model{N, TVs, TWprimes, Tmobilities},
+    t
+) where {
+    F,
+    T <: Tuple{Vararg{AbstractVector{<:Real}}},
+    N, TVs, TWprimes, Tmobilities
+}
+    init = :(dens = pwc_densities(x.x...))
+
+    loop = Expr(:block, (quote
+        for i in 1:length(x.x[$spec])
+            v::F = p.Vs[$spec](x.x[$spec][i])
+
+            $(Expr(:block, (quote
+                v += total_interaction(p.Wprimes[$spec][$other], x.x[$other], x.x[$spec][i])
+            end for other in 1:N)...))
+
+            if v < 0
+                mob = p.mobilities[$spec](dens[$spec][:, 1, i]...)
+            else
+                mob = p.mobilities[$spec](dens[$spec][:, 2, i]...)
+            end
+            dx.x[$spec][i] = v * mob
+        end
+    end for spec in 1:N)...)
+
+    return :($init; $loop)
+end
+
+export gen_velocities2
+@generated function gen_velocities2(
+    dx::ArrayPartition{F, T},
+    x::ArrayPartition{F, T},
+    p::Model{N, TVs, TWprimes, Tmobilities},
+    t
+) where {
+    F,
+    T <: Tuple{Vararg{AbstractVector{<:Real}}},
+    N, TVs, TWprimes, Tmobilities
+}
+    init = :(dens = pwc_densities(x.x...))
+
+    loop = Expr(:block, (quote
+        dx.x[$spec] .= p.Vs[$spec].(x.x[$spec])
+        $(Expr(:block, (quote
+            for i in 1:length(x.x[$spec])
+                dx.x[$spec][i] += total_interaction(p.Wprimes[$spec][$other], x.x[$other], x.x[$spec][i])
+            end
+        end for other in 1:N)...))
+        for i in 1:length(x.x[$spec])
+            if dx.x[$spec][i] < 0
+                mob = p.mobilities[$spec](dens[$spec][:, 1, i]...)
+            else
+                mob = p.mobilities[$spec](dens[$spec][:, 2, i]...)
+            end
+            dx.x[$spec][i] *= mob
+        end
+    end for spec in 1:N)...)
+
+    return :($init; $loop)
+end
+
+export gen_velocities3
+@generated function gen_velocities3(
+    dx::ArrayPartition{F, T},
+    x::ArrayPartition{F, T},
+    p::Model{N, TVs, TWprimes, Tmobilities},
+    t
+) where {
+    F,
+    T <: Tuple{Vararg{AbstractVector{<:Real}}},
+    N, TVs, TWprimes, Tmobilities
+}
+    init = :(dens = pwc_densities(x.x...))
+
+    loop = Expr(:block, (quote
+        dx.x[$spec] .= p.Vs[$spec].(x.x[$spec])
+        $(Expr(:block, (quote
+            for i in 1:length(x.x[$spec])
+                dx.x[$spec][i] += total_interaction(p.Wprimes[$spec][$other], x.x[$other], x.x[$spec][i])
+            end
+        end for other in 1:N)...))
+        for i in 1:length(x.x[$spec])
+            d = dens[$spec]
+            if dx.x[$spec][i] < 0
+                mob = $(Expr(:call,
+                    :(p.mobilities[$spec]),
+                    (:(d[$j, 1, i]) for j in 1:N)...
+                ))
+            else
+                mob = $(Expr(:call,
+                    :(p.mobilities[$spec]),
+                    (:(d[$j, 2, i]) for j in 1:N)...
+                ))
+            end
+            dx.x[$spec][i] *= mob
+        end
+    end for spec in 1:N)...)
+
+    return :($init; $loop)
+end
