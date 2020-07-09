@@ -131,3 +131,73 @@ function make_velocities(
     end
     velocities
 end
+
+export Model
+mutable struct Model{
+    N,
+    TVs         <: Tuple{Vararg{Any,N}},
+    TWprimes    <: Tuple{Vararg{Tuple{Vararg{Any,N}},N}},
+    Tmobilities <: Tuple{Vararg{Any,N}},
+}
+    Vs::TVs
+    Wprimes::TWprimes
+    mobilities::Tmobilities
+end
+
+export param_velocities
+function param_velocities(
+    dx::ArrayPartition{F, T},
+    x::ArrayPartition{F, T},
+    p::Model{N, TVs, TWprimes, Tmobilities},
+    t
+) where {
+    F,
+    T <: Tuple{Vararg{AbstractVector{<:Real}}},
+    N, TVs, TWprimes, Tmobilities
+}
+    dens = pwc_densities(x.x...)
+    for spec in 1:N
+        for i in 1:length(x.x[spec])
+            v::F = p.Vs[spec](x.x[spec][i])
+            for other in 1:N
+                v += total_interaction(p.Wprimes[spec][other], x.x[other], x.x[spec][i])
+            end
+            if v < 0
+                mob = p.mobilities[spec](dens[spec][:, 1, i]...)
+            else
+                mob = p.mobilities[spec](dens[spec][:, 2, i]...)
+            end
+            dx.x[spec][i] = v * mob
+        end
+    end
+end
+
+export param_velocities2
+function param_velocities2(
+    dx::ArrayPartition{F, T},
+    x::ArrayPartition{F, T},
+    p::Model{N, TVs, TWprimes, Tmobilities},
+    t
+) where {
+    F,
+    T <: Tuple{Vararg{AbstractVector{<:Real}}},
+    N, TVs, TWprimes, Tmobilities
+}
+    dens = pwc_densities(x.x...)
+    for spec in 1:N
+        dx.x[spec] .= p.Vs[spec].(x.x[spec])
+        for other in 1:N
+            for i in 1:length(x.x[spec])
+                dx.x[spec][i] += total_interaction(p.Wprimes[spec][other], x.x[other], x.x[spec][i])
+            end
+        end
+        for i in 1:length(x.x[spec])
+            if dx.x[spec][i] < 0
+                mob = p.mobilities[spec](dens[spec][:, 1, i]...)
+            else
+                mob = p.mobilities[spec](dens[spec][:, 2, i]...)
+            end
+            dx.x[spec][i] *= mob
+        end
+    end
+end
