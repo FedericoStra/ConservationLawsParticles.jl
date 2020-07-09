@@ -7,6 +7,7 @@ include("utils.jl")
 include("densities.jl")
 include("velocities.jl")
 include("plotting.jl")
+include("examples.jl")
 
 export empty_like
 export pwc_density, pwc_densities
