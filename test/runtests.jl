@@ -6,6 +6,10 @@ using Test
     include("test_densities.jl")
 end
 
+@testset "velocities" begin
+    include("test_velocities.jl")
+end
+
 @testset "make_velocities" begin
     V(x) = - x^3 + 0.2sin(12x)
     Wprime(r) = - 5 * sign(r) / (abs(r) + 1)
