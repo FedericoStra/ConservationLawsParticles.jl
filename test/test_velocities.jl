@@ -51,7 +51,7 @@ end
         gen_velocities(dx_gen, x, model, 0.0)
         gen_velocities2(dx_gen2, x, model, 0.0)
         gen_velocities3(dx_gen3, x, model, 0.0)
-        @test_skip dx_vels == dx_vels_
+        @test dx_vels ≈ dx_vels_
         @test dx_vels == dx_param
         @test dx_vels == dx_param2
         @test dx_vels == dx_gen
@@ -81,7 +81,7 @@ end
         gen_velocities(dx_gen, x, model, 0.0)
         gen_velocities2(dx_gen2, x, model, 0.0)
         gen_velocities3(dx_gen3, x, model, 0.0)
-        @test_skip dx_vels == dx_vels_
+        @test dx_vels ≈ dx_vels_
         @test dx_vels == dx_param
         @test dx_vels == dx_param2
         @test dx_vels == dx_gen
