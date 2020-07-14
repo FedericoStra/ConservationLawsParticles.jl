@@ -126,7 +126,7 @@ function pwc_densities(xs::Vararg{AbstractVector{<:Real}, N}) where N
     fs::NTuple{N, T} = 1 ./ (len .- 1)
     # @debug "Entering loop" T len ds fs
     i_min = Int[0]
-    while true
+    @inbounds while true
         n_mins::Int = 0
         for i in 1:N
             if ind[i] <= len[i]
@@ -152,7 +152,10 @@ function pwc_densities(xs::Vararg{AbstractVector{<:Real}, N}) where N
         # end
         for i in i_mins
             # @debug "Assigning left" i ind[i] ds
-            dens[i][:, 1, ind[i]] .= ds
+            # dens[i][:, 1, ind[i]] = ds
+            for s in 1:N
+                dens[i][s, 1, ind[i]] = ds[s]
+            end
         end
         for i in i_mins
             if ind[i] < length(xs[i])
@@ -164,7 +167,10 @@ function pwc_densities(xs::Vararg{AbstractVector{<:Real}, N}) where N
         end
         for i in i_mins
             # @debug "Assigning right" i ind[i] ds
-            dens[i][:, 2, ind[i]] .= ds
+            # dens[i][:, 2, ind[i]] = ds
+            for s in 1:N
+                dens[i][s, 2, ind[i]] = ds[s]
+            end
         end
         # ind[i_mins] .+= 1
         for i in i_mins
