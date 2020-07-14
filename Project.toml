@@ -3,7 +3,7 @@ uuid = "dbb53eb6-f4e4-11e9-1aca-071dd871ed0a"
 license = "MIT"
 desc = "Particle method to solve 1D conservation laws"
 authors = ["Federico Stra <stra.federico@gmail.com>"]
-version = "0.1.0"
+version = "0.2.0"
 
 [deps]
 DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
