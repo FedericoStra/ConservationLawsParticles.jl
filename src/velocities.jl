@@ -102,6 +102,20 @@ function total_interaction_(Wprime, ys::AbstractVector{<:Real}, x::Real)
     w / length(ys)
 end
 
+export integrated_total_interaction
+function integrated_total_interaction(W, dens::AbstractVector{<:Real}, ys::AbstractVector{<:Real}, x::Real)
+    sum(i -> (dens[i] - dens[i+1]) * W(ys[i] - x), eachindex(ys))
+end
+
+function integrated_total_interaction(W, s::Integer, dens::AbstractArray{<:Real,3}, ys::AbstractVector{<:Real}, x::Real)
+    sum(i -> (dens[s, 1, i] - dens[s, 2, i]) * W(ys[i] - x), eachindex(ys))
+end
+
+export fast_integrated_total_interaction
+function fast_integrated_total_interaction(W, dens_diff::AbstractVector{<:Real}, ys::AbstractVector{<:Real}, x::Real)
+    sum(i -> dens_diff[i] * W(ys[i] - x), eachindex(ys))
+end
+
 function make_velocities(
         Vs::Tuple{Vararg{Any,N}},
         Wprimes::Tuple{Vararg{Tuple{Vararg{Any,N}},N}},
@@ -286,6 +300,52 @@ export gen_velocities3
         $(Expr(:block, (quote
             for i in 1:length(x.x[$spec])
                 dx.x[$spec][i] += total_interaction(p.Wprimes[$spec][$other], x.x[$other], x.x[$spec][i])
+            end
+        end for other in 1:N)...))
+        for i in 1:length(x.x[$spec])
+            d = dens[$spec]
+            if dx.x[$spec][i] < 0
+                mob = $(Expr(:call,
+                    :(p.mobilities[$spec]),
+                    (:(d[$j, 1, i]) for j in 1:N)...
+                ))
+            else
+                mob = $(Expr(:call,
+                    :(p.mobilities[$spec]),
+                    (:(d[$j, 2, i]) for j in 1:N)...
+                ))
+            end
+            dx.x[$spec][i] *= mob
+        end
+    end for spec in 1:N)...)
+
+    return :($init; $loop)
+end
+
+export int_velocities
+@generated function int_velocities(
+    dx::ArrayPartition{F, T},
+    x::ArrayPartition{F, T},
+    p::Model{N, TVs, TWprimes, Tmobilities},
+    t
+) where {
+    F,
+    T <: Tuple{Vararg{AbstractVector{<:Real}}},
+    N, TVs, TWprimes, Tmobilities
+}
+    init = quote
+        dens = pwc_densities(x.x...)
+        dens_diff = Vector{Vector{F}}(undef, N)
+        for s in 1:N
+            dens_diff[s] = dens[s][s, 1, :] - dens[s][s, 2, :]
+        end
+    end
+
+    loop = Expr(:block, (quote
+        dx.x[$spec] .= p.Vs[$spec].(x.x[$spec])
+        $(Expr(:block, (quote
+            for i in 1:length(x.x[$spec])
+                dx.x[$spec][i] += fast_integrated_total_interaction(p.Wprimes[$spec][$other], dens_diff[$other], x.x[$other], x.x[$spec][i])
             end
         end for other in 1:N)...))
         for i in 1:length(x.x[$spec])
