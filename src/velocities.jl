@@ -93,6 +93,10 @@ function total_interaction(Wprime, ys::AbstractVector{<:Real}, x::Real)
     sum(Wprime(y - x) for y in ys) / length(ys)
 end
 
+function total_interaction_(x::Real; Wprime, particles::AbstractVector{<:Real})
+    sum(Wprime(p - x) for p in particles) / length(particles)
+end
+
 function total_interaction_(Wprime, ys::AbstractVector{<:Real}, x::Real)
     T = promote_type(eltype(ys), typeof(x))
     w::T = 0
@@ -204,6 +208,37 @@ function param_velocities2(
             for i in 1:length(x.x[spec])
                 dx.x[spec][i] += total_interaction(p.Wprimes[spec][other], x.x[other], x.x[spec][i])
             end
+        end
+        for i in 1:length(x.x[spec])
+            if dx.x[spec][i] < 0
+                mob = p.mobilities[spec](dens[spec][:, 1, i]...)
+            else
+                mob = p.mobilities[spec](dens[spec][:, 2, i]...)
+            end
+            dx.x[spec][i] *= mob
+        end
+    end
+end
+
+export param_velocities3
+function param_velocities3(
+    dx::ArrayPartition{F, T},
+    x::ArrayPartition{F, T},
+    p::Model{N, TVs, TWprimes, Tmobilities},
+    t
+) where {
+    F,
+    T <: Tuple{Vararg{AbstractVector{<:Real}}},
+    N, TVs, TWprimes, Tmobilities
+}
+    dens = pwc_densities(x.x...)
+    for spec in 1:N
+        dx.x[spec] .= p.Vs[spec].(x.x[spec])
+        for other in 1:N
+        #     for i in 1:length(x.x[spec])
+        #         dx.x[spec][i] += total_interaction_(x.x[spec][i]; Wprime=p.Wprimes[spec][other], particles=x.x[other])
+        #     end
+            dx.x[spec] .+= total_interaction_.(x.x[spec]; Wprime=p.Wprimes[spec][other], particles=x.x[other])
         end
         for i in 1:length(x.x[spec])
             if dx.x[spec][i] < 0
