@@ -162,6 +162,18 @@ mutable struct Model{
     mobilities::Tmobilities
 end
 
+export IntegralModel
+mutable struct IntegralModel{
+    N,
+    TVs         <: Tuple{Vararg{Any,N}},
+    TWs         <: Tuple{Vararg{Tuple{Vararg{Any,N}},N}},
+    Tmobilities <: Tuple{Vararg{Any,N}},
+}
+    Vs::TVs
+    Ws::TWs
+    mobilities::Tmobilities
+end
+
 export param_velocities
 function param_velocities(
     dx::ArrayPartition{F, T},
@@ -361,12 +373,12 @@ export int_velocities
 @generated function int_velocities(
     dx::ArrayPartition{F, T},
     x::ArrayPartition{F, T},
-    p::Model{N, TVs, TWprimes, Tmobilities},
+    p::IntegralModel{N, TVs, TWs, Tmobilities},
     t
 ) where {
     F,
     T <: Tuple{Vararg{AbstractVector{<:Real}}},
-    N, TVs, TWprimes, Tmobilities
+    N, TVs, TWs, Tmobilities
 }
     init = quote
         dens = pwc_densities(x.x...)
@@ -380,7 +392,7 @@ export int_velocities
         dx.x[$spec] .= p.Vs[$spec].(x.x[$spec])
         $(Expr(:block, (quote
             for i in 1:length(x.x[$spec])
-                dx.x[$spec][i] += fast_integrated_total_interaction(p.Wprimes[$spec][$other], dens_diff[$other], x.x[$other], x.x[$spec][i])
+                dx.x[$spec][i] += fast_integrated_total_interaction(p.Ws[$spec][$other], dens_diff[$other], x.x[$other], x.x[$spec][i])
             end
         end for other in 1:N)...))
         for i in 1:length(x.x[$spec])
