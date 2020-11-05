@@ -5,6 +5,7 @@ using DocStringExtensions
 
 include("utils.jl")
 include("densities.jl")
+include("piecewise_constant_functions.jl")
 include("models.jl")
 include("interactions.jl")
 include("diffusion.jl")
