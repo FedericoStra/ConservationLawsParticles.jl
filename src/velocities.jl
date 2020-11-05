@@ -93,6 +93,10 @@ function total_interaction(Wprime, ys::AbstractVector{<:Real}, x::Real)
     sum(Wprime(y - x) for y in ys) / length(ys)
 end
 
+function total_interaction(t, Wprime, ys::AbstractVector{<:Real}, x::Real)
+    sum(Wprime(t, y - x) for y in ys) / length(ys)
+end
+
 function total_interaction_(x::Real; Wprime, particles::AbstractVector{<:Real})
     sum(Wprime(p - x) for p in particles) / length(particles)
 end
@@ -111,8 +115,8 @@ function integrated_total_interaction(W, dens::AbstractVector{<:Real}, ys::Abstr
     sum(i -> (dens[i] - dens[i+1]) * W(ys[i] - x), eachindex(ys))
 end
 
-function integrated_total_interaction(W, s::Integer, dens::AbstractArray{<:Real,3}, ys::AbstractVector{<:Real}, x::Real)
-    sum(i -> (dens[s, 1, i] - dens[s, 2, i]) * W(ys[i] - x), eachindex(ys))
+function integrated_total_interaction(t, W, s::Integer, dens::AbstractArray{<:Real,3}, ys::AbstractVector{<:Real}, x::Real)
+    sum(i -> (dens[s, 1, i] - dens[s, 2, i]) * W(t, ys[i] - x), eachindex(ys))
 end
 
 export fast_integrated_total_interaction
@@ -137,6 +141,37 @@ function make_velocities(
                 v::F = Vs[spec](x.x[spec][i])
                 for other in 1:N
                     v += total_interaction(Wprimes[spec][other], x.x[other], x.x[spec][i])
+                end
+                if v < 0
+                    mob = mobilities[spec](dens[spec][:, 1, i]...)
+                else
+                    mob = mobilities[spec](dens[spec][:, 2, i]...)
+                end
+                dx.x[spec][i] = v * mob
+            end
+        end
+    end
+    velocities
+end
+
+export make_velocities_time
+function make_velocities_time(
+        Vs::Tuple{Vararg{Any,N}},
+        Wprimes::Tuple{Vararg{Tuple{Vararg{Any,N}},N}},
+        mobilities::Tuple{Vararg{Any,N}}
+        ) where N
+    function velocities(
+            dx::ArrayPartition{F, T},
+            x::ArrayPartition{F, T},
+            p,
+            t
+            ) where F where T<:Tuple{Vararg{AbstractVector{<:Real}}}
+        dens = pwc_densities(x.x...)
+        for spec in 1:N
+            for i in 1:length(x.x[spec])
+                v::F = Vs[spec](t, x.x[spec][i])
+                for other in 1:N
+                    v += total_interaction(t, Wprimes[spec][other], x.x[other], x.x[spec][i])
                 end
                 if v < 0
                     mob = mobilities[spec](dens[spec][:, 1, i]...)
@@ -349,6 +384,46 @@ export gen_velocities3
                 dx.x[$spec][i] += total_interaction(p.Wprimes[$spec][$other], x.x[$other], x.x[$spec][i])
             end
         end for other in 1:N)...))
+        for i in 1:length(x.x[$spec])
+            d = dens[$spec]
+            if dx.x[$spec][i] < 0
+                mob = $(Expr(:call,
+                    :(p.mobilities[$spec]),
+                    (:(d[$j, 1, i]) for j in 1:N)...
+                ))
+            else
+                mob = $(Expr(:call,
+                    :(p.mobilities[$spec]),
+                    (:(d[$j, 2, i]) for j in 1:N)...
+                ))
+            end
+            dx.x[$spec][i] *= mob
+        end
+    end for spec in 1:N)...)
+
+    return :($init; $loop)
+end
+
+export gen_velocities4
+@generated function gen_velocities4(
+    dx::ArrayPartition{F, T},
+    x::ArrayPartition{F, T},
+    p::Model{N, TVs, TWprimes, Tmobilities},
+    t
+) where {
+    F,
+    T <: Tuple{Vararg{AbstractVector{<:Real}}},
+    N, TVs, TWprimes, Tmobilities
+}
+    init = :(dens = pwc_densities(x.x...))
+
+    loop = Expr(:block, (quote
+        dx.x[$spec] .= p.Vs[$spec].(x.x[$spec])
+        # $(Expr(:block, (quote
+        #     for i in 1:length(x.x[$spec])
+        #         dx.x[$spec][i] += total_interaction(p.Wprimes[$spec][$other], x.x[$other], x.x[$spec][i])
+        #     end
+        # end for other in 1:N)...))
         for i in 1:length(x.x[$spec])
             d = dens[$spec]
             if dx.x[$spec][i] < 0
