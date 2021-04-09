@@ -1,15 +1,26 @@
-# Particles.jl
-
 ```@meta
-CurrentModule = Particles
-DocTestSetup = quote
-    using Particles
-end
+CurrentModule = ConservationLawsParticles
 ```
 
-Documentation for Particles.jl
+# ConservationLawsParticles.jl
 
-```@docs
-empty_like
-pwc_density
+Documentation for [ConservationLawsParticles.jl](https://github.com/FedericoStra/ConservationLawsParticles.jl).
+
+## Library
+
+```@index
+```
+
+### Public
+
+```@autodocs
+Modules = [ConservationLawsParticles]
+Private = false
+```
+
+### Private
+
+```@autodocs
+Modules = [ConservationLawsParticles]
+Public = false
 ```

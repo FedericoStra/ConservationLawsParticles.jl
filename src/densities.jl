@@ -13,9 +13,9 @@ if we assume `x[0] = -∞` and `x[n+2] = ∞`).
 
 # Examples
 
-```jldoctest; setup = :(using Particles)
+```jldoctest; setup = :(using ConservationLawsParticles)
 julia> pwc_density([0, 1, 3])
-4-element Array{Float64,1}:
+4-element Vector{Float64}:
  0.0
  0.5
  0.25

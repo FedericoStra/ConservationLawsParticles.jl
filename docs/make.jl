@@ -1,16 +1,23 @@
+using ConservationLawsParticles
 using Documenter
-using Particles
 
-makedocs(
-    sitename = "Particles",
-    authors = "Federico Stra",
-    format = Documenter.HTML(prettyurls = false),
-    modules = [Particles]
+DocMeta.setdocmeta!(ConservationLawsParticles, :DocTestSetup, :(using ConservationLawsParticles); recursive=true)
+
+makedocs(;
+    modules=[ConservationLawsParticles],
+    authors="Federico Stra <stra.federico@gmail.com> and contributors",
+    repo="https://github.com/FedericoStra/ConservationLawsParticles.jl/blob/{commit}{path}#{line}",
+    sitename="ConservationLawsParticles.jl",
+    format=Documenter.HTML(;
+        prettyurls=get(ENV, "CI", "false") == "true",
+        canonical="https://FedericoStra.github.io/ConservationLawsParticles.jl",
+        assets=String[],
+    ),
+    pages=[
+        "Home" => "index.md",
+    ],
 )
 
-# Documenter can also automatically deploy documentation to gh-pages.
-# See "Hosting Documentation" and deploydocs() in the Documenter manual
-# for more information.
-#=deploydocs(
-    repo = "<repository url>"
-)=#
+deploydocs(;
+    repo="github.com/FedericoStra/ConservationLawsParticles.jl",
+)
