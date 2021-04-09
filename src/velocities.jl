@@ -387,11 +387,13 @@ export gen_velocities3
         for i in 1:length(x.x[$spec])
             d = dens[$spec]
             if dx.x[$spec][i] < 0
+                # mob = (p.mobilities[spec])($((:(d[$j, 1, i]) for j in 1:N)...))
                 mob = $(Expr(:call,
                     :(p.mobilities[$spec]),
                     (:(d[$j, 1, i]) for j in 1:N)...
                 ))
             else
+                # mob = (p.mobilities[spec])($((:(d[$j, 2, i]) for j in 1:N)...))
                 mob = $(Expr(:call,
                     :(p.mobilities[$spec]),
                     (:(d[$j, 2, i]) for j in 1:N)...
