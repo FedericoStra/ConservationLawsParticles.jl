@@ -1,4 +1,4 @@
-module Particles
+module ConservationLawsParticles
 
 using RecursiveArrayTools
 using DocStringExtensions
