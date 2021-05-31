@@ -93,12 +93,16 @@ function total_interaction(Wprime, ys::AbstractVector{<:Real}, x::Real)
     sum(Wprime(y - x) for y in ys) / (length(ys) - 1)
 end
 
-function total_interaction(t, Wprime, ys::AbstractVector{<:Real}, x::Real)
+function total_interaction(t::Real, Wprime, ys::AbstractVector{<:Real}, x::Real)
     sum(Wprime(t, y - x) for y in ys) / (length(ys) - 1)
 end
 
 function total_interaction_(x::Real; Wprime, particles::AbstractVector{<:Real})
     sum(Wprime(p - x) for p in particles) / (length(particles) - 1)
+end
+
+function total_interaction_(t::Real, x::Real; Wprime, particles::AbstractVector{<:Real})
+    sum(Wprime(t, p - x) for p in particles) / (length(particles) - 1)
 end
 
 function total_interaction_(Wprime, ys::AbstractVector{<:Real}, x::Real)
@@ -115,13 +119,17 @@ function integrated_total_interaction(W, dens::AbstractVector{<:Real}, ys::Abstr
     sum(i -> (dens[i] - dens[i+1]) * W(ys[i] - x), eachindex(ys))
 end
 
-function integrated_total_interaction(t, W, s::Integer, dens::AbstractArray{<:Real,3}, ys::AbstractVector{<:Real}, x::Real)
+function integrated_total_interaction(t::Real, W, s::Integer, dens::AbstractArray{<:Real,3}, ys::AbstractVector{<:Real}, x::Real)
     sum(i -> (dens[s, 1, i] - dens[s, 2, i]) * W(t, ys[i] - x), eachindex(ys))
 end
 
 export fast_integrated_total_interaction
 function fast_integrated_total_interaction(W, dens_diff::AbstractVector{<:Real}, ys::AbstractVector{<:Real}, x::Real)
     sum(i -> dens_diff[i] * W(ys[i] - x), eachindex(ys))
+end
+
+function fast_integrated_total_interaction(t::Real, W, dens_diff::AbstractVector{<:Real}, ys::AbstractVector{<:Real}, x::Real)
+    sum(i -> dens_diff[i] * W(t, ys[i] - x), eachindex(ys))
 end
 
 function make_velocities(
@@ -378,10 +386,10 @@ export gen_velocities3
     init = :(dens = pwc_densities(x.x...))
 
     loop = Expr(:block, (quote
-        dx.x[$spec] .= p.Vs[$spec].(x.x[$spec])
+        dx.x[$spec] .= p.Vs[$spec].(t, x.x[$spec])
         $(Expr(:block, (quote
             for i in 1:length(x.x[$spec])
-                dx.x[$spec][i] += total_interaction(p.Wprimes[$spec][$other], x.x[$other], x.x[$spec][i])
+                dx.x[$spec][i] += total_interaction(t, p.Wprimes[$spec][$other], x.x[$other], x.x[$spec][i])
             end
         end for other in 1:N)...))
         for i in 1:length(x.x[$spec])
@@ -466,10 +474,10 @@ export int_velocities
     end
 
     loop = Expr(:block, (quote
-        dx.x[$spec] .= p.Vs[$spec].(x.x[$spec])
+        dx.x[$spec] .= p.Vs[$spec].(t, x.x[$spec])
         $(Expr(:block, (quote
             for i in 1:length(x.x[$spec])
-                dx.x[$spec][i] += fast_integrated_total_interaction(p.Ws[$spec][$other], dens_diff[$other], x.x[$other], x.x[$spec][i])
+                dx.x[$spec][i] += fast_integrated_total_interaction(t, p.Ws[$spec][$other], dens_diff[$other], x.x[$other], x.x[$spec][i])
             end
         end for other in 1:N)...))
         for i in 1:length(x.x[$spec])
