@@ -17,7 +17,7 @@ function make_velocity(V::Function, Wprime::Function, mobility::Function)
             for j in i+1:len
                 v += Wprime(x[j] - x[i])
             end
-            v /= len
+            v /= len - 1
             v += V(x[i])
             if v < 0
                 mob = mobility(R[i])
@@ -54,7 +54,7 @@ function make_velocities_(
                 for j in i+1:length(x.x[spec])
                     v += Wprime(x.x[spec][j] - x.x[spec][i])
                 end
-                v /= length(x.x[spec])
+                v /= length(x.x[spec]) - 1
                 # interaction with `other < spec`
                 for other in 1:spec-1
                     local Wprime = Wprimes[spec][other]
@@ -62,7 +62,7 @@ function make_velocities_(
                     for j in 1:length(x.x[other])
                         w += Wprime(x.x[other][j] - x.x[spec][i])
                     end
-                    v += w / length(x.x[other])
+                    v += w / (length(x.x[other]) - 1)
                 end
                 # interaction with `other > spec`
                 for other in spec+1:N
@@ -71,7 +71,7 @@ function make_velocities_(
                     for j in 1:length(x.x[other])
                         w += Wprime(x.x[other][j] - x.x[spec][i])
                     end
-                    v += w / length(x.x[other])
+                    v += w / (length(x.x[other]) - 1)
                 end
                 # external velocity
                 v += Vs[spec](x.x[spec][i])
@@ -90,15 +90,15 @@ end
 export total_interaction, total_interaction_
 
 function total_interaction(Wprime, ys::AbstractVector{<:Real}, x::Real)
-    sum(Wprime(y - x) for y in ys) / length(ys)
+    sum(Wprime(y - x) for y in ys) / (length(ys) - 1)
 end
 
 function total_interaction(t, Wprime, ys::AbstractVector{<:Real}, x::Real)
-    sum(Wprime(t, y - x) for y in ys) / length(ys)
+    sum(Wprime(t, y - x) for y in ys) / (length(ys) - 1)
 end
 
 function total_interaction_(x::Real; Wprime, particles::AbstractVector{<:Real})
-    sum(Wprime(p - x) for p in particles) / length(particles)
+    sum(Wprime(p - x) for p in particles) / (length(particles) - 1)
 end
 
 function total_interaction_(Wprime, ys::AbstractVector{<:Real}, x::Real)
@@ -107,7 +107,7 @@ function total_interaction_(Wprime, ys::AbstractVector{<:Real}, x::Real)
     for y in ys
         w += Wprime(y - x)
     end
-    w / length(ys)
+    w / (length(ys) - 1)
 end
 
 export integrated_total_interaction
