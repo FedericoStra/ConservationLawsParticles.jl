@@ -105,7 +105,7 @@ function total_interaction_(t::Real, x::Real; Wprime, particles::AbstractVector{
     sum(Wprime(t, p - x) for p in particles) / (length(particles) - 1)
 end
 
-function total_interaction_(Wprime, ys::AbstractVector{<:Real}, x::Real)
+function total_interaction__(Wprime, ys::AbstractVector{<:Real}, x::Real)
     T = promote_type(eltype(ys), typeof(x))
     w::T = 0
     for y in ys
@@ -231,9 +231,9 @@ function param_velocities(
     dens = pwc_densities(x.x...)
     for spec in 1:N
         for i in 1:length(x.x[spec])
-            v::F = p.Vs[spec](x.x[spec][i])
+            v::F = p.Vs[spec](t, x.x[spec][i])
             for other in 1:N
-                v += total_interaction(p.Wprimes[spec][other], x.x[other], x.x[spec][i])
+                v += total_interaction(t, p.Wprimes[spec][other], x.x[other], x.x[spec][i])
             end
             if v < 0
                 mob = p.mobilities[spec](dens[spec][:, 1, i]...)
@@ -258,10 +258,10 @@ function param_velocities2(
 }
     dens = pwc_densities(x.x...)
     for spec in 1:N
-        dx.x[spec] .= p.Vs[spec].(x.x[spec])
+        dx.x[spec] .= p.Vs[spec].(t, x.x[spec])
         for other in 1:N
             for i in 1:length(x.x[spec])
-                dx.x[spec][i] += total_interaction(p.Wprimes[spec][other], x.x[other], x.x[spec][i])
+                dx.x[spec][i] += total_interaction(t, p.Wprimes[spec][other], x.x[other], x.x[spec][i])
             end
         end
         for i in 1:length(x.x[spec])
@@ -288,12 +288,12 @@ function param_velocities3(
 }
     dens = pwc_densities(x.x...)
     for spec in 1:N
-        dx.x[spec] .= p.Vs[spec].(x.x[spec])
+        dx.x[spec] .= p.Vs[spec].(t, x.x[spec])
         for other in 1:N
         #     for i in 1:length(x.x[spec])
         #         dx.x[spec][i] += total_interaction_(x.x[spec][i]; Wprime=p.Wprimes[spec][other], particles=x.x[other])
         #     end
-            dx.x[spec] .+= total_interaction_.(x.x[spec]; Wprime=p.Wprimes[spec][other], particles=x.x[other])
+            dx.x[spec] .+= total_interaction_.(t, x.x[spec]; Wprime=p.Wprimes[spec][other], particles=x.x[other])
         end
         for i in 1:length(x.x[spec])
             if dx.x[spec][i] < 0
