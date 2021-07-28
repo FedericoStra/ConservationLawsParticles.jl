@@ -3,7 +3,7 @@ uuid = "dbb53eb6-f4e4-11e9-1aca-071dd871ed0a"
 license = "MIT"
 desc = "Particle method to solve 1D conservation laws"
 authors = ["Federico Stra <stra.federico@gmail.com>"]
-version = "0.3.0"
+version = "0.4.1"
 
 [deps]
 DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
@@ -15,6 +15,7 @@ SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 DocStringExtensions = "0.8"
 Plots = "1.4"
 RecursiveArrayTools = "2"
+SpecialFunctions = "1"
 julia = "1"
 
 [extras]

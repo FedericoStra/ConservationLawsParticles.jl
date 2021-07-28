@@ -17,7 +17,7 @@ function make_velocity(V::Function, Wprime::Function, mobility::Function)
             for j in i+1:len
                 v += Wprime(x[j] - x[i])
             end
-            v /= len
+            v /= len - 1
             v += V(x[i])
             if v < 0
                 mob = mobility(R[i])
@@ -54,7 +54,7 @@ function make_velocities_(
                 for j in i+1:length(x.x[spec])
                     v += Wprime(x.x[spec][j] - x.x[spec][i])
                 end
-                v /= length(x.x[spec])
+                v /= length(x.x[spec]) - 1
                 # interaction with `other < spec`
                 for other in 1:spec-1
                     local Wprime = Wprimes[spec][other]
@@ -62,7 +62,7 @@ function make_velocities_(
                     for j in 1:length(x.x[other])
                         w += Wprime(x.x[other][j] - x.x[spec][i])
                     end
-                    v += w / length(x.x[other])
+                    v += w / (length(x.x[other]) - 1)
                 end
                 # interaction with `other > spec`
                 for other in spec+1:N
@@ -71,7 +71,7 @@ function make_velocities_(
                     for j in 1:length(x.x[other])
                         w += Wprime(x.x[other][j] - x.x[spec][i])
                     end
-                    v += w / length(x.x[other])
+                    v += w / (length(x.x[other]) - 1)
                 end
                 # external velocity
                 v += Vs[spec](x.x[spec][i])
@@ -90,24 +90,28 @@ end
 export total_interaction, total_interaction_
 
 function total_interaction(Wprime, ys::AbstractVector{<:Real}, x::Real)
-    sum(Wprime(y - x) for y in ys) / length(ys)
+    sum(Wprime(y - x) for y in ys) / (length(ys) - 1)
 end
 
-function total_interaction(t, Wprime, ys::AbstractVector{<:Real}, x::Real)
-    sum(Wprime(t, y - x) for y in ys) / length(ys)
+function total_interaction(t::Real, Wprime, ys::AbstractVector{<:Real}, x::Real)
+    sum(Wprime(t, y - x) for y in ys) / (length(ys) - 1)
 end
 
 function total_interaction_(x::Real; Wprime, particles::AbstractVector{<:Real})
-    sum(Wprime(p - x) for p in particles) / length(particles)
+    sum(Wprime(p - x) for p in particles) / (length(particles) - 1)
 end
 
-function total_interaction_(Wprime, ys::AbstractVector{<:Real}, x::Real)
+function total_interaction_(t::Real, x::Real; Wprime, particles::AbstractVector{<:Real})
+    sum(Wprime(t, p - x) for p in particles) / (length(particles) - 1)
+end
+
+function total_interaction__(Wprime, ys::AbstractVector{<:Real}, x::Real)
     T = promote_type(eltype(ys), typeof(x))
     w::T = 0
     for y in ys
         w += Wprime(y - x)
     end
-    w / length(ys)
+    w / (length(ys) - 1)
 end
 
 export integrated_total_interaction
@@ -115,13 +119,17 @@ function integrated_total_interaction(W, dens::AbstractVector{<:Real}, ys::Abstr
     sum(i -> (dens[i] - dens[i+1]) * W(ys[i] - x), eachindex(ys))
 end
 
-function integrated_total_interaction(t, W, s::Integer, dens::AbstractArray{<:Real,3}, ys::AbstractVector{<:Real}, x::Real)
+function integrated_total_interaction(t::Real, W, s::Integer, dens::AbstractArray{<:Real,3}, ys::AbstractVector{<:Real}, x::Real)
     sum(i -> (dens[s, 1, i] - dens[s, 2, i]) * W(t, ys[i] - x), eachindex(ys))
 end
 
 export fast_integrated_total_interaction
 function fast_integrated_total_interaction(W, dens_diff::AbstractVector{<:Real}, ys::AbstractVector{<:Real}, x::Real)
     sum(i -> dens_diff[i] * W(ys[i] - x), eachindex(ys))
+end
+
+function fast_integrated_total_interaction(t::Real, W, dens_diff::AbstractVector{<:Real}, ys::AbstractVector{<:Real}, x::Real)
+    sum(i -> dens_diff[i] * W(t, ys[i] - x), eachindex(ys))
 end
 
 function make_velocities(
@@ -223,9 +231,9 @@ function param_velocities(
     dens = pwc_densities(x.x...)
     for spec in 1:N
         for i in 1:length(x.x[spec])
-            v::F = p.Vs[spec](x.x[spec][i])
+            v::F = p.Vs[spec](t, x.x[spec][i])
             for other in 1:N
-                v += total_interaction(p.Wprimes[spec][other], x.x[other], x.x[spec][i])
+                v += total_interaction(t, p.Wprimes[spec][other], x.x[other], x.x[spec][i])
             end
             if v < 0
                 mob = p.mobilities[spec](dens[spec][:, 1, i]...)
@@ -250,10 +258,10 @@ function param_velocities2(
 }
     dens = pwc_densities(x.x...)
     for spec in 1:N
-        dx.x[spec] .= p.Vs[spec].(x.x[spec])
+        dx.x[spec] .= p.Vs[spec].(t, x.x[spec])
         for other in 1:N
             for i in 1:length(x.x[spec])
-                dx.x[spec][i] += total_interaction(p.Wprimes[spec][other], x.x[other], x.x[spec][i])
+                dx.x[spec][i] += total_interaction(t, p.Wprimes[spec][other], x.x[other], x.x[spec][i])
             end
         end
         for i in 1:length(x.x[spec])
@@ -280,12 +288,12 @@ function param_velocities3(
 }
     dens = pwc_densities(x.x...)
     for spec in 1:N
-        dx.x[spec] .= p.Vs[spec].(x.x[spec])
+        dx.x[spec] .= p.Vs[spec].(t, x.x[spec])
         for other in 1:N
         #     for i in 1:length(x.x[spec])
         #         dx.x[spec][i] += total_interaction_(x.x[spec][i]; Wprime=p.Wprimes[spec][other], particles=x.x[other])
         #     end
-            dx.x[spec] .+= total_interaction_.(x.x[spec]; Wprime=p.Wprimes[spec][other], particles=x.x[other])
+            dx.x[spec] .+= total_interaction_.(t, x.x[spec]; Wprime=p.Wprimes[spec][other], particles=x.x[other])
         end
         for i in 1:length(x.x[spec])
             if dx.x[spec][i] < 0
@@ -378,10 +386,10 @@ export gen_velocities3
     init = :(dens = pwc_densities(x.x...))
 
     loop = Expr(:block, (quote
-        dx.x[$spec] .= p.Vs[$spec].(x.x[$spec])
+        dx.x[$spec] .= p.Vs[$spec].(t, x.x[$spec])
         $(Expr(:block, (quote
             for i in 1:length(x.x[$spec])
-                dx.x[$spec][i] += total_interaction(p.Wprimes[$spec][$other], x.x[$other], x.x[$spec][i])
+                dx.x[$spec][i] += total_interaction(t, p.Wprimes[$spec][$other], x.x[$other], x.x[$spec][i])
             end
         end for other in 1:N)...))
         for i in 1:length(x.x[$spec])
@@ -466,10 +474,10 @@ export int_velocities
     end
 
     loop = Expr(:block, (quote
-        dx.x[$spec] .= p.Vs[$spec].(x.x[$spec])
+        dx.x[$spec] .= p.Vs[$spec].(t, x.x[$spec])
         $(Expr(:block, (quote
             for i in 1:length(x.x[$spec])
-                dx.x[$spec][i] += fast_integrated_total_interaction(p.Ws[$spec][$other], dens_diff[$other], x.x[$other], x.x[$spec][i])
+                dx.x[$spec][i] += fast_integrated_total_interaction(t, p.Ws[$spec][$other], dens_diff[$other], x.x[$other], x.x[$spec][i])
             end
         end for other in 1:N)...))
         for i in 1:length(x.x[$spec])
