@@ -1,3 +1,4 @@
 [deps]
 ConservationLawsParticles = "dbb53eb6-f4e4-11e9-1aca-071dd871ed0a"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd"
