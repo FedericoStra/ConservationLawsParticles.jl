@@ -87,52 +87,7 @@ function make_velocities_(
     velocities
 end
 
-export sampled_interaction, integrated_interaction
-
-function sampled_interaction(x::Real, Wprime, ys::AbstractVector{<:Real})
-    sum(Wprime(y - x) for y in ys) / (length(ys) - 1)
-end
-
-function sampled_interaction(t::Real, x::Real, Wprime, ys::AbstractVector{<:Real})
-    sum(Wprime(t, y - x) for y in ys) / (length(ys) - 1)
-end
-
-function sampled_interaction(x::Real; Wprime, particles::AbstractVector{<:Real})
-    sum(Wprime(p - x) for p in particles) / (length(particles) - 1)
-end
-
-function sampled_interaction(t::Real, x::Real; Wprime, particles::AbstractVector{<:Real})
-    sum(Wprime(t, p - x) for p in particles) / (length(particles) - 1)
-end
-
-# function total_interaction__(Wprime, ys::AbstractVector{<:Real}, x::Real)
-#     T = promote_type(eltype(ys), typeof(x))
-#     w::T = 0
-#     for y in ys
-#         w += Wprime(y - x)
-#     end
-#     w / (length(ys) - 1)
-# end
-
-
-function integrated_interaction(x::Real, W, ys::AbstractVector{<:Real}, dens_diff::AbstractVector{<:Real}=-diff(pwc_density(ys)))
-    sum(i -> dens_diff[i] * W(ys[i] - x), eachindex(ys))
-end
-
-function integrated_interaction(t::Real, x::Real, W, ys::AbstractVector{<:Real}, dens_diff::AbstractVector{<:Real}=-diff(pwc_density(ys)))
-    sum(i -> dens_diff[i] * W(t, ys[i] - x), eachindex(ys))
-end
-
-
-function integrated_interaction_(x::Real, W, ys::AbstractVector{<:Real}, dens::AbstractVector{<:Real})
-    sum(i -> (dens[i] - dens[i+1]) * W(ys[i] - x), eachindex(ys))
-end
-
-function integrated_interaction_(t::Real, x::Real, W, s::Integer, dens::AbstractArray{<:Real,3}, ys::AbstractVector{<:Real})
-    sum(i -> (dens[s, 1, i] - dens[s, 2, i]) * W(t, ys[i] - x), eachindex(ys))
-end
-
-
+export make_velocities
 function make_velocities(
         Vs::Tuple{Vararg{Any,N}},
         Wprimes::Tuple{Vararg{Tuple{Vararg{Any,N}},N}},
@@ -195,33 +150,9 @@ function make_velocities_time(
 end
 
 
-export SampledInteraction
-mutable struct SampledInteraction{
-    N,
-    TVs         <: Tuple{Vararg{Any,N}},
-    TWprimes    <: Tuple{Vararg{Tuple{Vararg{Any,N}},N}},
-    Tmobilities <: Tuple{Vararg{Any,N}},
-}
-    Vs::TVs
-    Wprimes::TWprimes
-    mobilities::Tmobilities
-end
-
-
-export IntegratedInteraction
-mutable struct IntegratedInteraction{
-    N,
-    TVs         <: Tuple{Vararg{Any,N}},
-    TWs         <: Tuple{Vararg{Tuple{Vararg{Any,N}},N}},
-    Tmobilities <: Tuple{Vararg{Any,N}},
-}
-    Vs::TVs
-    Ws::TWs
-    mobilities::Tmobilities
-end
-
-
 export velocities, velocities!
+export velocities_gen, velocities_gen!
+
 
 function velocities(
     x::ArrayPartition{F, T},
@@ -299,8 +230,6 @@ function velocities!(
     end
 end
 
-
-export velocities_gen, velocities_gen!
 
 function velocities_gen(
     x::ArrayPartition{F, T},
