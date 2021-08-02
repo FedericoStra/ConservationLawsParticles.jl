@@ -91,3 +91,30 @@ end
     end
 end
 end # integrated
+
+@testset "sampled-integrated" begin
+@testset "1-S" begin
+    smodel = SampledInteraction((V,), ((Wprime_attr,),), (mobility,))
+    imodel = IntegratedInteraction((V,), ((W_attr,),), (mobility,))
+    lengths = (200)
+    x = ArrayPartition((sort(gaussian_particles(2, len)) for len in lengths)...)
+    dx_s = zero(x)
+    dx_i = zero(x)
+    velocities_gen!(dx_s, x, smodel, 0.0)
+    velocities_gen!(dx_i, x, imodel, 0.0)
+    @test maximum(abs.(dx_s - dx_i)) < 0.01
+end
+
+@testset "2-S" begin
+    smodel = SampledInteraction((V,V), ((Wprime_attr,Wprime_rep),(Wprime_rep,Wprime_attr)), (mobρ,mobσ))
+    imodel = IntegratedInteraction((V,V), ((W_attr,W_rep),(W_rep,W_attr)), (mobρ,mobσ))
+    lengths = (200, 200)
+    x = ArrayPartition((sort(gaussian_particles(2, len)) for len in lengths)...)
+    x.x[2] .+= 1
+    dx_s = zero(x)
+    dx_i = zero(x)
+    velocities_gen!(dx_s, x, smodel, 0.0)
+    velocities_gen!(dx_i, x, imodel, 0.0)
+    @test maximum(abs.(dx_s - dx_i)) < 0.022
+end
+end # sampled-integrated
