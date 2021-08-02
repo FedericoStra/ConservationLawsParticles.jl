@@ -211,7 +211,7 @@ function velocities!(
     dens = pwc_densities(x.x...)
     dens_diff = similar(x)
     for s in 1:N
-        dens_diff.x[s] .= dens[s][s, 1, :] .- dens[s][s, 2, :]
+        dens_diff.x[s] .= dens[s][s, 2, :] .- dens[s][s, 1, :]
     end
     for spec in 1:N
         dx.x[spec] .= p.Vs[spec].(t, x.x[spec])
@@ -290,7 +290,7 @@ quote
     dens = pwc_densities(x.x...)
     dens_diff = similar(x)
     for s in 1:N
-        dens_diff.x[s] .= dens[s][s, 1, :] .- dens[s][s, 2, :]
+        dens_diff.x[s] .= dens[s][s, 2, :] .- dens[s][s, 1, :]
     end
     # $((:(dens_diff.x[$s] .= dens[$s][$s, 1, :] .- dens[$s][$s, 2, :]) for s in 1:N)...)
     $((quote

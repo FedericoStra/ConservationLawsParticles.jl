@@ -52,10 +52,10 @@ end
 # end
 
 
-function integrated_interaction(x::Real, W, ys::AbstractVector{<:Real}, dens_diff::AbstractVector{<:Real}=-diff(pwc_density(ys)))
-    sum(i -> dens_diff[i] * W(ys[i] - x), eachindex(ys))
+function integrated_interaction(x::Real, W, ys::AbstractVector{<:Real}, dens_diff::AbstractVector{<:Real}=diff(pwc_density(ys)))
+    -sum(i -> dens_diff[i] * W(x - ys[i]), eachindex(ys))
 end
 
-function integrated_interaction(t::Real, x::Real, W, ys::AbstractVector{<:Real}, dens_diff::AbstractVector{<:Real}=-diff(pwc_density(ys)))
-    sum(i -> dens_diff[i] * W(t, ys[i] - x), eachindex(ys))
+function integrated_interaction(t::Real, x::Real, W, ys::AbstractVector{<:Real}, dens_diff::AbstractVector{<:Real}=diff(pwc_density(ys)))
+    -sum(i -> dens_diff[i] * W(t, x - ys[i]), eachindex(ys))
 end
