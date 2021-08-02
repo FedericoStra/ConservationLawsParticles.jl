@@ -14,8 +14,8 @@ See also [`IntegratedInteraction`](@ref).
 
 # Examples
 
-```jldoctest
-julia> using ConservationLawsParticles, RecursiveArrayTools
+```jldoctest; setup = :(using ConservationLawsParticles)
+julia> using RecursiveArrayTools
 
 julia> model = SampledInteraction(
            (V, V),
@@ -55,8 +55,8 @@ See also [`SampledInteraction`](@ref).
 
 # Examples
 
-```jldoctest
-julia> using ConservationLawsParticles, RecursiveArrayTools
+```jldoctest; setup = :(using ConservationLawsParticles)
+julia> using RecursiveArrayTools
 
 julia> model = IntegratedInteraction(
            (V, V),
@@ -86,8 +86,8 @@ end
 @doc raw"""
     sampled_interaction([t,] x, W′, ys)
 
-Computes $-(W' * \dot\rho)(t, x)$, which is the sampled approximation of $-(W' * \rho)(t, x)$,
-where $\rho$ is the piecewise-constant density associated to the particles `ys`.
+Computes ``-(W' * \dot\rho)(t, x)``, which is the sampled approximation of ``-(W' * \rho)(t, x)``,
+where ``\rho`` is the piecewise-constant density associated to the particles `ys`.
 
 It `t` is omitted, then `W′(x)` is assumed independent of time.
 
@@ -124,14 +124,15 @@ end
 @doc raw"""
     integrated_interaction([t,] x, W, ys[, dens_diff])
 
-Computes $-(W' * \rho)(t, x) = -(W * \rho')(t,x)$, where $\rho$ is the piecewise-constant
+Computes ``-(W' * \rho)(t, x) = -(W * \rho')(t,x)``, where ``\rho`` is the piecewise-constant
 density associated to the particles `ys`.
 
 It `t` is omitted, then `W(x)` is assumed independent of time.
 
-**Important!**
-To ensure the correctness of the computation, `dens_diff` must coincide with `diff(pwc_density(ys))`.
-It can be pre-computed and passed explicitly to allow reuse (as an optimization).
+!!! note
+
+    To ensure the correctness of the computation, `dens_diff` must coincide with `diff(pwc_density(ys))`.
+    It can be pre-computed and passed explicitly to allow reuse (as an optimization).
 
 See also [`sampled_interaction`](@ref).
 """

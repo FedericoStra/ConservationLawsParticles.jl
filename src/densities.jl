@@ -1,6 +1,4 @@
 """
-$(TYPEDSIGNATURES)
-
     pwc_density(x::AbstractVector)
 
 Returns the piecewise constant probability density from the quantile particle positions.
