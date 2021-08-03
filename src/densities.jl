@@ -179,11 +179,3 @@ function pwc_densities(xs::Vararg{AbstractVector{<:Real}, N}) where N
 end
 
 new_undef_densities(T::Type, N::Int, len::Int) = Array{T, 3}(undef, (N, 2, len))
-
-function right_local_density(x::AbstractVector, i::Integer, f::Number)
-    if i < length(x)
-        f / (x[i+1] - x[i])
-    else
-        0
-    end
-end
