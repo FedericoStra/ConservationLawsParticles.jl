@@ -1,4 +1,5 @@
 using .ConservationLawsParticles.Examples
+using .ConservationLawsParticles: make_velocity, make_velocities
 
 @testset "sampled" begin
 @testset "1-S" begin
