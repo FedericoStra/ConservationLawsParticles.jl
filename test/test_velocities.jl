@@ -4,7 +4,7 @@ using .ConservationLawsParticles.Examples
 @testset "1-S" begin
     vel = make_velocity(V, Wprime_attr, mob)
     vels = make_velocities((V,), ((Wprime_attr,),), (mob,))
-    model = SampledInteraction((V,), ((Wprime_attr,),), (mob,))
+    model = SampledModel((V,), ((Wprime_attr,),), (mob,))
     @testset for len in [2, 5, 10, 50, 100]
         x = ArrayPartition(sort(randn(100)))
         dx_vel = zero(x)
@@ -22,7 +22,7 @@ using .ConservationLawsParticles.Examples
 end
 
 @testset "2-S" begin
-    model = SampledInteraction((V, V2), ((Wprime_rep, Wprime_attr), (Wprime_attr, Wprime_rep)), (mobρ, mobσ))
+    model = SampledModel((V, V2), ((Wprime_rep, Wprime_attr), (Wprime_attr, Wprime_rep)), (mobρ, mobσ))
     vels = make_velocities((V, V2), ((Wprime_rep, Wprime_attr), (Wprime_attr, Wprime_rep)), (mobρ, mobσ))
     @testset for lengths in [(2,2), (2,3), (3,5), (7,10), (50,100)]
         x = ArrayPartition((sort(randn(len)) for len in lengths)...)
@@ -39,7 +39,7 @@ end
 
 @testset "3-S" begin
     mob(a, b, c) = a + b*c
-    model = SampledInteraction((V, V, V2), ((Wprime_rep, Wprime_attr, Wprime_attr), (Wprime_attr, Wprime_rep, Wprime_attr), (Wprime_attr, Wprime_attr, Wprime_rep)), (mob, mob, mob))
+    model = SampledModel((V, V, V2), ((Wprime_rep, Wprime_attr, Wprime_attr), (Wprime_attr, Wprime_rep, Wprime_attr), (Wprime_attr, Wprime_attr, Wprime_rep)), (mob, mob, mob))
     vels = make_velocities((V, V, V2), ((Wprime_rep, Wprime_attr, Wprime_attr), (Wprime_attr, Wprime_rep, Wprime_attr), (Wprime_attr, Wprime_attr, Wprime_rep)), (mob, mob, mob))
     @testset for lengths in [(2,2,2), (2,3,5), (3,5,7), (7,10,15), (50,75,100)]
         x = ArrayPartition((sort(randn(len)) for len in lengths)...)
@@ -57,7 +57,7 @@ end # sampled
 
 @testset "integrated" begin
 @testset "1-S" begin
-    model = IntegratedInteraction((V,), ((W_attr,),), (mob,))
+    model = IntegratedModel((V,), ((W_attr,),), (mob,))
     @testset for len in [2, 5, 10, 50, 100]
         x = ArrayPartition(sort(randn(100)))
         dx_par = zero(x)
@@ -69,7 +69,7 @@ end # sampled
 end
 
 @testset "2-S" begin
-    model = IntegratedInteraction((V, V2), ((W_rep, W_attr), (W_attr, W_rep)), (mobρ, mobσ))
+    model = IntegratedModel((V, V2), ((W_rep, W_attr), (W_attr, W_rep)), (mobρ, mobσ))
     @testset for lengths in [(2,2), (2,3), (3,5), (7,10), (50,100)]
         x = ArrayPartition((sort(randn(len)) for len in lengths)...)
         dx_par = zero(x)
@@ -82,7 +82,7 @@ end
 
 @testset "3-S" begin
     mob(a, b, c) = a + b*c
-    model = IntegratedInteraction((V, V, V2), ((W_rep, W_attr, W_attr), (W_attr, W_rep, W_attr), (W_attr, W_attr, W_rep)), (mob, mob, mob))
+    model = IntegratedModel((V, V, V2), ((W_rep, W_attr, W_attr), (W_attr, W_rep, W_attr), (W_attr, W_attr, W_rep)), (mob, mob, mob))
     @testset for lengths in [(2,2,2), (2,3,5), (3,5,7), (7,10,15), (50,75,100)]
         x = ArrayPartition((sort(randn(len)) for len in lengths)...)
         dx_par = zero(x)
@@ -96,8 +96,8 @@ end # integrated
 
 @testset "sampled-integrated" begin
 @testset "1-S" begin
-    smodel = SampledInteraction((V,), ((Wprime_attr,),), (mob,))
-    imodel = IntegratedInteraction((V,), ((W_attr,),), (mob,))
+    smodel = SampledModel((V,), ((Wprime_attr,),), (mob,))
+    imodel = IntegratedModel((V,), ((W_attr,),), (mob,))
     lengths = (200)
     x = ArrayPartition((sort(gaussian_particles(2, len)) for len in lengths)...)
     dx_s = zero(x)
@@ -108,8 +108,8 @@ end # integrated
 end
 
 @testset "2-S" begin
-    smodel = SampledInteraction((V,V), ((Wprime_attr,Wprime_rep),(Wprime_rep,Wprime_attr)), (mobρ,mobσ))
-    imodel = IntegratedInteraction((V,V), ((W_attr,W_rep),(W_rep,W_attr)), (mobρ,mobσ))
+    smodel = SampledModel((V,V), ((Wprime_attr,Wprime_rep),(Wprime_rep,Wprime_attr)), (mobρ,mobσ))
+    imodel = IntegratedModel((V,V), ((W_attr,W_rep),(W_rep,W_attr)), (mobρ,mobσ))
     lengths = (200, 200)
     x = ArrayPartition((sort(gaussian_particles(2, len)) for len in lengths)...)
     x.x[2] .+= 1

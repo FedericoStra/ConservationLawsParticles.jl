@@ -1,8 +1,8 @@
-export SampledInteraction, IntegratedInteraction
+export SampledModel, IntegratedModel
 export sampled_interaction, integrated_interaction
 
 """
-    SampledInteraction((V₁, ...), ((W′₁₁, ...), ...), (mob₁, ...)
+    SampledModel((V₁, ...), ((W′₁₁, ...), ...), (mob₁, ...)
 
 Represents a particles system with:
 
@@ -10,14 +10,14 @@ Represents a particles system with:
 - sampled interactions `W′ᵢⱼ` (this is the effect of the species `j` on the species `i`),
 - mobilities `mobᵢ`.
 
-See also [`IntegratedInteraction`](@ref).
+See also [`IntegratedModel`](@ref).
 
 # Examples
 
 ```jldoctest; setup = :(using ConservationLawsParticles)
 julia> using ConservationLawsParticles.Examples, RecursiveArrayTools
 
-julia> model = SampledInteraction(
+julia> model = SampledModel(
            (V, V),
            ((Wprime_attr, Wprime_rep),
             (Wprime_rep, Wprime_attr)),
@@ -30,7 +30,7 @@ julia> velocities(x, model, 0.)
 ([6.291136247066298, 0.2466663161150116, -0.7218917091339228, -7.22630670503873], [22.405129478914613, 1.1249366684885518, 1.5188519354999799, -7.87111869358889, -54.536397957423915])
 ```
 """
-mutable struct SampledInteraction{
+mutable struct SampledModel{
     N,
     TVs         <: Tuple{Vararg{Any,N}},
     TWprimes    <: Tuple{Vararg{Tuple{Vararg{Any,N}},N}},
@@ -43,7 +43,7 @@ end
 
 
 """
-    IntegratedInteraction((V₁, ...), ((W₁₁, ...), ...), (mob₁, ...)
+    IntegratedModel((V₁, ...), ((W₁₁, ...), ...), (mob₁, ...)
 
 Represents a particles system with:
 
@@ -51,14 +51,14 @@ Represents a particles system with:
 - integrated interactions `Wᵢⱼ` (this is the effect of the species `j` on the species `i`),
 - mobilities `mobᵢ`.
 
-See also [`SampledInteraction`](@ref).
+See also [`SampledModel`](@ref).
 
 # Examples
 
 ```jldoctest; setup = :(using ConservationLawsParticles)
 julia> using ConservationLawsParticles.Examples, RecursiveArrayTools
 
-julia> model = IntegratedInteraction(
+julia> model = IntegratedModel(
            (V, V),
            ((W_attr, W_rep),
             (W_rep, W_attr)),
@@ -71,7 +71,7 @@ julia> velocities(x, model, 0.)
 ([6.621647425385332, 0.30545649966452776, -0.42671180044513507, -6.914302510772401], [23.261098611816987, 0.9023583690557855, 0.7055593913708742, -8.774526834146023, -55.23308442021724])
 ```
 """
-mutable struct IntegratedInteraction{
+mutable struct IntegratedModel{
     N,
     TVs         <: Tuple{Vararg{Any,N}},
     TWs         <: Tuple{Vararg{Tuple{Vararg{Any,N}},N}},

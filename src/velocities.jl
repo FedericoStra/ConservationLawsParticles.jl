@@ -4,7 +4,7 @@ export velocities_gen, velocities_gen!
 
 function velocities(
     x::ArrayPartition{F, T},
-    p::Union{SampledInteraction, IntegratedInteraction},
+    p::Union{SampledModel, IntegratedModel},
     t
 ) where {
     F,
@@ -18,7 +18,7 @@ end
 function velocities!(
     dx::ArrayPartition{F, T},
     x::ArrayPartition{F, T},
-    p::SampledInteraction{N, TVs, TWprimes, Tmobilities},
+    p::SampledModel{N, TVs, TWprimes, Tmobilities},
     t
 ) where {
     F,
@@ -49,7 +49,7 @@ end
 function velocities!(
     dx::ArrayPartition{F, T},
     x::ArrayPartition{F, T},
-    p::IntegratedInteraction{N, TVs, TWs, Tmobilities},
+    p::IntegratedModel{N, TVs, TWs, Tmobilities},
     t
 ) where {
     F,
@@ -81,7 +81,7 @@ end
 
 function velocities_gen(
     x::ArrayPartition{F, T},
-    p::Union{SampledInteraction, IntegratedInteraction},
+    p::Union{SampledModel, IntegratedModel},
     t
 ) where {
     F,
@@ -95,7 +95,7 @@ end
 @generated function velocities_gen!(
     dx::ArrayPartition{F, T},
     x::ArrayPartition{F, T},
-    p::SampledInteraction{N, TVs, TWprimes, Tmobilities},
+    p::SampledModel{N, TVs, TWprimes, Tmobilities},
     t
 ) where {
     F,
@@ -127,7 +127,7 @@ end
 @generated function velocities_gen!(
     dx::ArrayPartition{F, T},
     x::ArrayPartition{F, T},
-    p::IntegratedInteraction{N, TVs, TWs, Tmobilities},
+    p::IntegratedModel{N, TVs, TWs, Tmobilities},
     t
 ) where {
     F,
