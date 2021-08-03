@@ -12,13 +12,19 @@ using .ConservationLawsParticles: make_velocity, make_velocities
         dx_vels = zero(x)
         dx_par = zero(x)
         dx_gen = zero(x)
+        dx_abs_par = zero(x)
+        dx_abs_gen = zero(x)
         vel(dx_vel, x, nothing, 0.0)
         vels(dx_vels, x, nothing, 0.0)
         velocities!(dx_par, x, model, 0.0)
         velocities_gen!(dx_gen, x, model, 0.0)
+        abstract_velocities!(dx_abs_par, x, model, 0.0)
+        abstract_velocities_gen!(dx_abs_gen, x, model, 0.0)
         @test dx_vel == dx_vels
         @test dx_vel == dx_par
         @test dx_vel == dx_gen
+        @test dx_vel == dx_abs_par
+        @test dx_vel == dx_abs_gen
     end
 end
 
@@ -30,11 +36,17 @@ end
         dx_vels = zero(x)
         dx_par = zero(x)
         dx_gen = zero(x)
+        dx_abs_par = zero(x)
+        dx_abs_gen = zero(x)
         vels(dx_vels, x, nothing, 0.0)
         velocities!(dx_par, x, model, 0.0)
         velocities_gen!(dx_gen, x, model, 0.0)
+        abstract_velocities!(dx_abs_par, x, model, 0.0)
+        abstract_velocities_gen!(dx_abs_gen, x, model, 0.0)
         @test dx_vels == dx_par
         @test dx_vels == dx_gen
+        @test dx_vels == dx_abs_par
+        @test dx_vels == dx_abs_gen
     end
 end
 
@@ -47,11 +59,17 @@ end
         dx_vels = zero(x)
         dx_par = zero(x)
         dx_gen = zero(x)
+        dx_abs_par = zero(x)
+        dx_abs_gen = zero(x)
         vels(dx_vels, x, nothing, 0.0)
         velocities!(dx_par, x, model, 0.0)
         velocities_gen!(dx_gen, x, model, 0.0)
+        abstract_velocities!(dx_abs_par, x, model, 0.0)
+        abstract_velocities_gen!(dx_abs_gen, x, model, 0.0)
         @test dx_vels == dx_par
         @test dx_vels == dx_gen
+        @test dx_vels == dx_abs_par
+        @test dx_vels == dx_abs_gen
     end
 end
 end # sampled
@@ -63,9 +81,15 @@ end # sampled
         x = ArrayPartition(sort(randn(100)))
         dx_par = zero(x)
         dx_gen = zero(x)
+        dx_abs_par = zero(x)
+        dx_abs_gen = zero(x)
         velocities!(dx_par, x, model, 0.0)
         velocities_gen!(dx_gen, x, model, 0.0)
+        abstract_velocities!(dx_abs_par, x, model, 0.0)
+        abstract_velocities_gen!(dx_abs_gen, x, model, 0.0)
         @test dx_par == dx_gen
+        @test dx_par == dx_abs_par
+        @test dx_par == dx_abs_gen
     end
 end
 
@@ -75,9 +99,15 @@ end
         x = ArrayPartition((sort(randn(len)) for len in lengths)...)
         dx_par = zero(x)
         dx_gen = zero(x)
+        dx_abs_par = zero(x)
+        dx_abs_gen = zero(x)
         velocities!(dx_par, x, model, 0.0)
         velocities_gen!(dx_gen, x, model, 0.0)
+        abstract_velocities!(dx_abs_par, x, model, 0.0)
+        abstract_velocities_gen!(dx_abs_gen, x, model, 0.0)
         @test dx_par == dx_gen
+        @test dx_par == dx_abs_par
+        @test dx_par == dx_abs_gen
     end
 end
 
@@ -88,9 +118,15 @@ end
         x = ArrayPartition((sort(randn(len)) for len in lengths)...)
         dx_par = zero(x)
         dx_gen = zero(x)
+        dx_abs_par = zero(x)
+        dx_abs_gen = zero(x)
         velocities!(dx_par, x, model, 0.0)
         velocities_gen!(dx_gen, x, model, 0.0)
+        abstract_velocities!(dx_abs_par, x, model, 0.0)
+        abstract_velocities_gen!(dx_abs_gen, x, model, 0.0)
         @test dx_par == dx_gen
+        @test dx_par == dx_abs_par
+        @test dx_par == dx_abs_gen
     end
 end
 end # integrated
