@@ -15,7 +15,7 @@ See also [`IntegratedInteraction`](@ref).
 # Examples
 
 ```jldoctest; setup = :(using ConservationLawsParticles)
-julia> using RecursiveArrayTools
+julia> using ConservationLawsParticles.Examples, RecursiveArrayTools
 
 julia> model = SampledInteraction(
            (V, V),
@@ -56,7 +56,7 @@ See also [`SampledInteraction`](@ref).
 # Examples
 
 ```jldoctest; setup = :(using ConservationLawsParticles)
-julia> using RecursiveArrayTools
+julia> using ConservationLawsParticles.Examples, RecursiveArrayTools
 
 julia> model = IntegratedInteraction(
            (V, V),
