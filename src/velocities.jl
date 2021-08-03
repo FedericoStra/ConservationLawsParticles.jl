@@ -229,6 +229,35 @@ export abstract_velocities, abstract_velocities!
 export abstract_velocities_gen, abstract_velocities_gen!
 
 
+function apply_velocity!(dx, x, p::AbstractModel, t, s::Integer)
+    xs = species(x, s)
+    dxs = species(dx, s)
+    dxs .= external_velocity(p, s).(t, xs)
+end
+
+function apply_all_interactions!(dx, x, p::AbstractModel, t, s::Integer, dens_diff)
+    for o in eachspecies(p)
+        apply_interaction!(dx, x, p, t, s, o, dens_diff.x[o])
+    end
+end
+
+function apply_interaction!(dx, x, p::SampledModel, t, s::Integer, o::Integer, dens_diff)
+    xs = species(x, s)
+    dxs = species(dx, s)
+    for i in eachindex(xs)
+        dxs[i] += sampled_interaction(t, xs[i], interaction(p, s, o), species(x, o))
+    end
+end
+
+function apply_interaction!(dx, x, p::IntegratedModel, t, s::Integer, o::Integer, dens_diff)
+    xs = species(x, s)
+    dxs = species(dx, s)
+    for i in eachindex(xs)
+        dxs[i] += integrated_interaction(t, xs[i], interaction(p, s, o), species(x, o), dens_diff)
+    end
+end
+
+
 function abstract_velocities(
     x::ArrayPartition{F, T},
     p::AbstractModel,
@@ -252,24 +281,24 @@ function abstract_velocities!(
     T <: Tuple{Vararg{AbstractVector{<:Real}}},
 }
     dens = pwc_densities(x.x...)
+    dens_diff = similar(x)
+    for s in eachspecies(p)
+        dens_diff.x[s] .= dens[s][s, 2, :] .- dens[s][s, 1, :]
+    end
     for s in eachspecies(p)
         xs = species(x, s)
         dxs = species(dx, s)
-        dxs .= external_velocity(p, s).(t, xs)
-        for o in eachspecies(p), i in eachindex(xs)
-            dxs[i] += sampled_interaction(t, xs[i], interaction(p, s, o), species(x, o))
-        end
-        # for o in eachspecies(p)
-        #     dxs .+= sampled_interaction.(t, xs; Wprime=interaction(p, s, o), particles=species(x, o))
-        # end
+        apply_velocity!(dx, x, p, t, s)
+        apply_all_interactions!(dx, x, p, t, s, dens_diff)
         d = dens[s]
+        mob = mobility(p, s)
         for i in eachindex(xs)
             if dxs[i] < 0
-                mob = mobility(p, s)(d[:, 1, i]...)
+                m = mob(d[:, 1, i]...)
             else
-                mob = mobility(p, s)(d[:, 2, i]...)
+                m = mob(d[:, 2, i]...)
             end
-            dxs[i] *= mob
+            dxs[i] *= m
         end
     end
 end
@@ -299,23 +328,26 @@ end
 }
 quote
     dens = pwc_densities(x.x...)
+    dens_diff = similar(x)
+    for s in eachspecies(p)
+        dens_diff.x[s] .= dens[s][s, 2, :] .- dens[s][s, 1, :]
+    end
     $((quote
         xs = species(x, $s)
         dxs = species(dx, $s)
-        dxs .= external_velocity(p, $s).(t, xs)
+        apply_velocity!(dx, x, p, t, $s)
         $((quote
-            for i in eachindex(xs)
-                dxs[i] += sampled_interaction(t, xs[i], interaction(p, $s, $o), species(x, $o))
-            end
+            apply_interaction!(dx, x, p, t, $s, $o, dens_diff.x[$o])
         end for o in eachspecies(p))...)
         d = dens[$s]
+        mob = mobility(p, $s)
         for i in eachindex(xs)
             if dxs[i] < 0
-                mob = mobility(p, $s)($((:(d[$j, 1, i]) for j in eachspecies(p))...))
+                m = mob($((:(d[$j, 1, i]) for j in eachspecies(p))...))
             else
-                mob = mobility(p, $s)($((:(d[$j, 2, i]) for j in eachspecies(p))...))
+                m = mob($((:(d[$j, 2, i]) for j in eachspecies(p))...))
             end
-            dxs[i] *= mob
+            dxs[i] *= m
         end
     end for s in eachspecies(p))...)
 end
