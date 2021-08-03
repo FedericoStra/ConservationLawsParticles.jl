@@ -1,6 +1,11 @@
 export AbstractModel, SampledModel, IntegratedModel
-export num_species, external_velocity, interaction, mobility
+export num_species, external_velocity, interaction, mobility, eachspecies, species
 
+"""
+$(TYPEDEF)
+
+Abstract type representing a particle model.
+"""
 abstract type AbstractModel end
 
 """
@@ -9,6 +14,7 @@ $(TYPEDSIGNATURES)
 Returns the number of species of the model.
 """
 num_species(mod::AbstractModel) = error("unimplemented")
+num_species(mod::Type{<:AbstractModel}) = error("unimplemented")
 
 """
 $(TYPEDSIGNATURES)
@@ -31,6 +37,20 @@ Returns the mobility associated to the species `i`.
 """
 mobility(mod::AbstractModel, i::Integer) = error("unimplemented")
 
+"""
+$(TYPEDSIGNATURES)
+
+Returns an iterator over the indices of the species of the model.
+"""
+eachspecies(mod::AbstractModel) = 1:num_species(mod)
+eachspecies(mod::Type{<:AbstractModel}) = 1:num_species(mod)
+
+"""
+$(TYPEDSIGNATURES)
+
+Returns the particles associated to the species `i`.
+"""
+species(state, i::Integer) = error("unimplemented")
 
 """
     SampledModel((V₁, ...), ((W′₁₁, ...), ...), (mob₁, ...)
@@ -117,6 +137,9 @@ end
 num_species(mod::SampledModel{N}) where N = N
 num_species(mod::IntegratedModel{N}) where N = N
 
+num_species(mod::Type{<:SampledModel{N}}) where N = N
+num_species(mod::Type{<:IntegratedModel{N}}) where N = N
+
 external_velocity(mod::SampledModel, i::Integer) = mod.Vs[i]
 external_velocity(mod::IntegratedModel, i::Integer) = mod.Vs[i]
 
@@ -125,3 +148,5 @@ interaction(mod::IntegratedModel, i::Integer, j::Integer) = mod.Ws[i][j]
 
 mobility(mod::SampledModel, i::Integer) = mod.mobilities[i]
 mobility(mod::IntegratedModel, i::Integer) = mod.mobilities[i]
+
+species(a::ArrayPartition, i::Integer) = a.x[i]

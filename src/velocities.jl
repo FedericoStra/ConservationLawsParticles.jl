@@ -223,3 +223,100 @@ function make_velocities(
     end
     velocities
 end
+
+
+export abstract_velocities, abstract_velocities!
+export abstract_velocities_gen, abstract_velocities_gen!
+
+
+function abstract_velocities(
+    x::ArrayPartition{F, T},
+    p::AbstractModel,
+    t
+) where {
+    F,
+    T <: Tuple{Vararg{AbstractVector{<:Real}}}
+}
+    dx = similar(x)
+    abstract_velocities!(dx, x, p, t)
+    dx
+end
+
+function abstract_velocities!(
+    dx::ArrayPartition{F, T},
+    x::ArrayPartition{F, T},
+    p::AbstractModel,
+    t
+) where {
+    F,
+    T <: Tuple{Vararg{AbstractVector{<:Real}}},
+}
+    dens = pwc_densities(x.x...)
+    for s in eachspecies(p)
+        xs = species(x, s)
+        dxs = species(dx, s)
+        dxs .= external_velocity(p, s).(t, xs)
+        for o in eachspecies(p), i in eachindex(xs)
+            dxs[i] += sampled_interaction(t, xs[i], interaction(p, s, o), species(x, o))
+        end
+        # for o in eachspecies(p)
+        #     dxs .+= sampled_interaction.(t, xs; Wprime=interaction(p, s, o), particles=species(x, o))
+        # end
+        d = dens[s]
+        for i in eachindex(xs)
+            if dxs[i] < 0
+                mob = mobility(p, s)(d[:, 1, i]...)
+            else
+                mob = mobility(p, s)(d[:, 2, i]...)
+            end
+            dxs[i] *= mob
+        end
+    end
+end
+
+
+function abstract_velocities_gen(
+    x::ArrayPartition{F, T},
+    p::AbstractModel,
+    t
+) where {
+    F,
+    T <: Tuple{Vararg{AbstractVector{<:Real}}}
+}
+    dx = similar(x)
+    abstract_velocities_gen!(dx, x, p, t)
+    dx
+end
+
+@generated function abstract_velocities_gen!(
+    dx::ArrayPartition{F, T},
+    x::ArrayPartition{F, T},
+    p::AbstractModel,
+    t
+) where {
+    F,
+    T <: Tuple{Vararg{AbstractVector{<:Real}}},
+}
+quote
+    dens = pwc_densities(x.x...)
+    $((quote
+        xs = species(x, $s)
+        dxs = species(dx, $s)
+        dxs .= external_velocity(p, $s).(t, xs)
+        $((quote
+            for i in eachindex(xs)
+                dxs[i] += sampled_interaction(t, xs[i], interaction(p, $s, $o), species(x, $o))
+            end
+        end for o in eachspecies(p))...)
+        d = dens[$s]
+        for i in eachindex(xs)
+            if dxs[i] < 0
+                mob = mobility(p, $s)($((:(d[$j, 1, i]) for j in eachspecies(p))...))
+            else
+                mob = mobility(p, $s)($((:(d[$j, 2, i]) for j in eachspecies(p))...))
+            end
+            dxs[i] *= mob
+        end
+    end for s in eachspecies(p))...)
+end
+end
