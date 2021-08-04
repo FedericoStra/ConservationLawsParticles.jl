@@ -1,6 +1,11 @@
 # Examples
 
-## Two species
+## Jupyter Notebook examples
+
+- [fancy example](Fancy.html) with time-dependend velocity field and interaction,
+- [traffic model](Traffic.html).
+
+## Two species example
 
 ```julia
 using ConservationLawsParticles
