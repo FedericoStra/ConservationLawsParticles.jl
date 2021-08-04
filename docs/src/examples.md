@@ -2,7 +2,7 @@
 
 ## Two species
 
-```@example two-species
+```julia
 using ConservationLawsParticles
 using RecursiveArrayTools, DifferentialEquations, Plots
 
@@ -39,12 +39,12 @@ plot!(sol, vars=1:2n, color=:blue)
 plot!(sol, vars=2n+1:4n, color=:red)
 plot!(title="2-species integrated scheme", xlabel="time", ylabel="position")
 
-savefig("two-species.png"); nothing # hide
+savefig("two-species.png")
 ```
 
 ![](two-species.png)
 
-```@example two-species
+```julia
 n = 60
 x0 = ArrayPartition(
     vcat(range(-2., -1.5, length=n), range(-1., -.5, length=n)),
@@ -65,3 +65,5 @@ end
 
 gif(anim, "two-species.gif")
 ```
+
+![](two-species.gif)
