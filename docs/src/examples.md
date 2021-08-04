@@ -50,8 +50,6 @@ x0 = ArrayPartition(
     vcat(range(-2., -1.5, length=n), range(-1., -.5, length=n)),
     vcat(range(.5, 1.5, length=2n)))
 
-tspan = (0., 1.2)
-
 prob = ODEProblem(velocities!, x0, tspan, imodel)
 
 sol = solve(prob, BS5(), reltol=1e-7, abstol=1e-7)

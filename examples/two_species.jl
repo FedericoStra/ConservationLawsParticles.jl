@@ -27,9 +27,29 @@ tspan = (0., 1.2)
 
 prob = ODEProblem(velocities!, x0, tspan, imodel)
 
-@time sol = solve(prob, BS5(), reltol=1e-6, abstol=1e-6);
+sol = solve(prob, BS5(), reltol=1e-6, abstol=1e-6)
 
 plot(legend=false)
 plot!(sol, vars=1:2n, color=:blue)
 plot!(sol, vars=2n+1:4n, color=:red)
 plot!(title="2-species integrated scheme", xlabel="time", ylabel="position")
+
+savefig("two-species.png")
+
+n = 60
+x0 = ArrayPartition(
+    vcat(range(-2., -1.5, length=n), range(-1., -.5, length=n)),
+    vcat(range(.5, 1.5, length=2n)))
+
+prob = ODEProblem(velocities!, x0, tspan, imodel)
+
+sol = solve(prob, BS5(), reltol=1e-7, abstol=1e-7)
+
+anim = @animate for t in tspan[1]:1/48:tspan[2]
+    p = plot(title="2-species integrated scheme", xlabel="position", ylabel="density",
+        legend=false, xlims=(-4,4), ylims=(0,1))
+    plot_density!(p, sol(t).x[1], color=:blue)
+    plot_density!(p, sol(t).x[2], color=:red)
+end
+
+gif(anim, "two-species.gif")
