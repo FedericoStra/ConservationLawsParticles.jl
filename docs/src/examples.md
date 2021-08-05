@@ -3,7 +3,8 @@
 ## Jupyter Notebook examples
 
 - [fancy example](Fancy.html) with time-dependend velocity field and interaction,
-- [traffic model](Traffic.html).
+- [simple traffic model](Traffic.html),
+- [complex traffic model](Traffic_time-dependent.html) with time-dependent external velocity.
 
 ## Two species example
 
