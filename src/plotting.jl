@@ -1,16 +1,14 @@
 using Plots
 
 function plot_density!(p, x; kwargs...)
-    X = Array{eltype(x)}(undef, 2*length(x)-2)
-    Y = Array{Float64}(undef, 2*length(x)-2)
+    X = Array{eltype(x)}(undef, 2*length(x))
+    Y = Array{Float64}(undef, 2*length(x))
     R = pwc_density(x)
-    X[1] = x[1]
-    for i in 2:length(x)-1
-        X[2i-2] = X[2i-1] = x[i]
-        Y[2i-3] = Y[2i-2] = R[i]
+    for i in eachindex(x)
+        X[2i-1] = X[2i] = x[i]
+        Y[2i-1] = R[i]
+        Y[2i]   = R[i+1]
     end
-    X[end] = x[end]
-    Y[end-1] = Y[end] = R[end-1]
     plot!(p, X, Y; kwargs...)
 end
 
