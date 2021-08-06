@@ -2,7 +2,7 @@ using ConservationLawsParticles
 using RecursiveArrayTools, DifferentialEquations, Plots
 
 # model
-V(t, x) = one(x)
+V(t, x) = t < 5 ? one(x) : -one(x)
 Wprime(t, x) = sign(x) / (abs(x) + 1)
 W(t, x) = log(abs(x) + 1)
 mob(ρ) = max(1 - ρ, 0)
@@ -13,7 +13,7 @@ imodel = IntegratedModel((V,), ((W,),), (mob,))
 x0 = ArrayPartition(vcat(range(0, 1, length=80)))
 
 # time span
-tspan = (0., 5.)
+tspan = (0., 10.)
 
 # ODE system for the particles
 sprob = ODEProblem(velocities!, x0, tspan, smodel)
@@ -32,7 +32,7 @@ savefig("trajectories.png")
 # plot an animation of the density
 anim = @animate for t in range(tspan...; step=1/48)
     p = plot(title="Density", xlabel="position", ylabel="density",
-        legend=false, xlims=(0,4), ylims=(0,1))
+        legend=false, xlims=(-2,4), ylims=(0,1))
     plot_density!(p, ssol(t); color=:blue)
     plot_density!(p, isol(t); color=:red)
     p
