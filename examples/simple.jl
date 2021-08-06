@@ -27,7 +27,7 @@ abstol = reltol = 1e-7;
 plot(title="Trajectories", xlabel="time", ylabel="position", legend=false)
 plot!(ssol, vars=1:2:80; color=:blue)
 plot!(isol, vars=1:2:80; color=:red)
-savefig("trajectories.png")
+savefig("simple.png")
 
 # plot an animation of the density
 anim = @animate for t in range(tspan...; step=1/48)
@@ -37,4 +37,4 @@ anim = @animate for t in range(tspan...; step=1/48)
     plot_density!(p, isol(t); color=:red)
     p
 end
-gif(anim, "density.gif")
+gif(anim, "simple.gif")
