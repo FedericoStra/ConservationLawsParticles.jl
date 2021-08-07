@@ -35,7 +35,7 @@ function velocities!(
         #     dx.x[spec] .+= sampled_interaction.(t, x.x[spec]; Wprime=p.Wprimes[spec][other], particles=x.x[other])
         # end
         d = dens[spec]
-        for i in eachindex(x.x[spec])
+        for i in eachindex(dx.x[spec])
             if dx.x[spec][i] < 0
                 mob = p.mobilities[spec](d[:, 1, i]...)
             else
@@ -67,7 +67,7 @@ function velocities!(
             dx.x[spec][i] += integrated_interaction(t, x.x[spec][i], p.Ws[spec][other], x.x[other], dens_diff.x[other])
         end
         d = dens[spec]
-        for i in eachindex(x.x[spec])
+        for i in eachindex(dx.x[spec])
             if dx.x[spec][i] < 0
                 mob = p.mobilities[spec](d[:, 1, i]...)
             else
@@ -112,7 +112,7 @@ quote
             end
         end for other in 1:N)...)
         d = dens[$spec]
-        for i in eachindex(x.x[$spec])
+        for i in eachindex(dx.x[$spec])
             if dx.x[$spec][i] < 0
                 mob = p.mobilities[$spec]($((:(d[$j, 1, i]) for j in 1:N)...))
             else
@@ -149,7 +149,7 @@ quote
             end
         end for other in 1:N)...)
         d = dens[$spec]
-        for i in eachindex(x.x[$spec])
+        for i in eachindex(dx.x[$spec])
             if dx.x[$spec][i] < 0
                 mob = p.mobilities[$spec]($((:(d[$j, 1, i]) for j in 1:N)...))
             else
@@ -292,7 +292,7 @@ function abstract_velocities!(
         apply_all_interactions!(dx, x, p, t, s, dens_diff)
         d = dens[s]
         mob = mobility(p, s)
-        for i in eachindex(xs)
+        for i in eachindex(dxs)
             if dxs[i] < 0
                 m = mob(d[:, 1, i]...)
             else
@@ -341,7 +341,7 @@ quote
         end for o in eachspecies(p))...)
         d = dens[$s]
         mob = mobility(p, $s)
-        for i in eachindex(xs)
+        for i in eachindex(dxs)
             if dxs[i] < 0
                 m = mob($((:(d[$j, 1, i]) for j in eachspecies(p))...))
             else
