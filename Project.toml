@@ -13,6 +13,7 @@ SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 
 [compat]
 DocStringExtensions = "0.8"
+RecipesBase = "1"
 RecursiveArrayTools = "2"
 SpecialFunctions = "1"
 julia = "1"
