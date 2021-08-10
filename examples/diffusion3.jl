@@ -39,7 +39,7 @@ abstol = reltol = 2e-8
 # plot the particle trajectories
 plot(legend=false, title="Trajectories", xlabel="time", ylabel="position")
 plot!(ssol, vars=eachindex(x0)[1:5:end]; color=:blue)
-savefig("advanced-diffusion2.png")
+savefig("diffusion3.png")
 
 # plot an animation of the density
 anim = @animate for t in range(tspan...; length=101)
@@ -48,4 +48,4 @@ anim = @animate for t in range(tspan...; length=101)
     plot!(x -> refsol(t, x); color=:blue, label="analytic")
     densityplot!(ssol(t); color=:red, label="particles")
 end
-gif(anim, "advanced-diffusion2.gif")
+gif(anim, "diffusion3.gif")

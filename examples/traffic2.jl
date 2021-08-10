@@ -30,7 +30,7 @@ abstol = reltol = 2e-8
 plot(legend=false, title="Trajectories", xlabel="time", ylabel="position")
 plot!(ssol, vars=1:20:401; color=:blue)
 plot!(isol, vars=1:20:401; color=:red)
-savefig("advanced-traffic.png")
+savefig("traffic2.png")
 
 # plot an animation of the density
 anim = @animate for t in range(tspan...; step=1/24)
@@ -44,4 +44,4 @@ anim = @animate for t in range(tspan...; step=1/24)
     plot_density!(p, ssol(t); color=:blue)
     plot_density!(p, isol(t); color=:red)
 end
-gif(anim, "advanced-traffic.gif")
+gif(anim, "traffic2.gif")
