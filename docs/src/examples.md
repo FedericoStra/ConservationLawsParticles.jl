@@ -8,6 +8,8 @@
 
 ## Simple example
 
+[`simple.jl`](https://github.com/FedericoStra/ConservationLawsParticles.jl/blob/master/examples/simple.jl)
+
 ```julia
 using ConservationLawsParticles
 using RecursiveArrayTools, DifferentialEquations, Plots
@@ -41,7 +43,7 @@ plot!(isol, vars=1:2:80; color=:red)
 savefig("simple.png")
 ```
 
-![](simple.png)
+![](plots/simple.png)
 
 ```julia
 # plot an animation of the density
@@ -55,9 +57,9 @@ end
 gif(anim, "simple.gif")
 ```
 
-![](simple.gif)
+![](plots/simple.gif)
 
-## Traffic example
+## Traffic example 1
 
 ```julia
 using ConservationLawsParticles
@@ -65,7 +67,6 @@ using RecursiveArrayTools, DifferentialEquations, Plots
 
 # model
 V(t, x) = 3 + (1+sin(3t)) * cos(4x)
-# Wprime(t, x) = x - 2sign(x) / (abs(x) + 1)^2
 Wprime(t, x) = 2 * sign(x) / (abs(x) + 1)
 mob(ρ) = max(1 - ρ, 0)
 model = SampledModel((V,), ((Wprime,),), (mob,))
@@ -82,12 +83,12 @@ prob = ODEProblem(velocities!, x0, tspan, model)
 sol = solve(prob, BS5(); reltol=1e-8, abstol=1e-8)
 
 # plot the particle trajectories
-plot(sol, vars=1:40:801; legend=false, color=:blue,
+plot(sol, vars=1:20:801; legend=false, color=:blue,
     title="Trajectories", xlabel="time", ylabel="position")
-savefig("traffic.png")
+savefig("traffic1.png")
 ```
 
-![](traffic.png)
+![](plots/traffic1.png)
 
 ```julia
 # plot an animation of the density
@@ -95,12 +96,12 @@ anim = @animate for t in range(tspan...; step=1/48)
     plot_density(sol(t); color=:blue, legend=false, xlims=(-2,12), ylims=(0,1),
         title="Density", xlabel="position", ylabel="density")
 end
-gif(anim, "traffic.gif")
+gif(anim, "traffic1.gif")
 ```
 
-![](traffic.gif)
+![](plots/traffic1.gif)
 
-## Traffic example
+## Traffic example 2
 
 ```julia
 using ConservationLawsParticles
@@ -135,10 +136,10 @@ abstol = reltol = 2e-8
 plot(legend=false, title="Trajectories", xlabel="time", ylabel="position")
 plot!(ssol, vars=1:20:401; color=:blue)
 plot!(isol, vars=1:20:401; color=:red)
-savefig("advanced-traffic.png")
+savefig("traffic2.png")
 ```
 
-![](advanced-traffic.png)
+![](plots/traffic2.png)
 
 ```julia
 # plot an animation of the density
@@ -153,10 +154,10 @@ anim = @animate for t in range(tspan...; step=1/24)
     plot_density!(p, ssol(t); color=:blue)
     plot_density!(p, isol(t); color=:red)
 end
-gif(anim, "advanced-traffic.gif")
+gif(anim, "traffic2.gif")
 ```
 
-![](advanced-traffic.gif)
+![](plots/traffic2.gif)
 
 ## Two species example
 
@@ -200,7 +201,7 @@ plot!(title="2-species integrated scheme", xlabel="time", ylabel="position")
 savefig("two-species.png")
 ```
 
-![](two-species.png)
+![](plots/two-species.png)
 
 ```julia
 n = 60
@@ -222,4 +223,4 @@ end
 gif(anim, "two-species.gif")
 ```
 
-![](two-species.gif)
+![](plots/two-species.gif)

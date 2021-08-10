@@ -353,8 +353,8 @@ quote
 end
 end
 
-export velocities_diff, velocities_diff!
 
+export velocities_diff, velocities_diff!
 
 function velocities_diff(
     x::ArrayPartition{F, T},
