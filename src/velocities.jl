@@ -352,3 +352,103 @@ quote
     end for s in eachspecies(p))...)
 end
 end
+
+export velocities_diff, velocities_diff!
+
+
+function velocities_diff(
+    x::ArrayPartition{F, T},
+    p::Union{SampledModel, IntegratedModel},
+    t
+) where {
+    F,
+    T <: Tuple{Vararg{AbstractVector{<:Real}}}
+}
+    dx = similar(x)
+    velocities_diff!(dx, x, p, t)
+    dx
+end
+
+function velocities_diff!(
+    dx::ArrayPartition{F, T},
+    x::ArrayPartition{F, T},
+    p::SampledModel{N, TVs, TWprimes, Tmobilities},
+    t
+) where {
+    F,
+    T <: Tuple{Vararg{AbstractVector{<:Real}}},
+    N, TVs, TWprimes, Tmobilities
+}
+    dens = pwc_densities(x.x...)
+    for spec in 1:N
+        dx.x[spec] .= p.Vs[spec].(t, x.x[spec])
+        for other in 1:N, i in eachindex(x.x[spec])
+            dx.x[spec][i] += sampled_interaction(t, x.x[spec][i], p.Wprimes[spec][other], x.x[other])
+        end
+        d = dens[spec]
+        for i in eachindex(dx.x[spec])
+            if dx.x[spec][i] < 0
+                mob = p.mobilities[spec](d[:, 1, i]...)
+            else
+                mob = p.mobilities[spec](d[:, 2, i]...)
+            end
+            dx.x[spec][i] *= mob
+            δdens = d[spec, 2, i] - d[spec, 1, i]
+            if i == 1
+                δx = x.x[spec][2] - x.x[spec][1]
+                ρ = d[spec, 2, 1]
+            elseif i == length(dx.x[spec])
+                δx = x.x[spec][end] - x.x[spec][end-1]
+                ρ = d[spec, 1, end]
+            else
+                δx = (x.x[spec][i+1] - x.x[spec][i-1]) / 2
+                ρ = min(d[spec, 1, i], d[spec, 2, i])
+            end
+            dx.x[spec][i] -= δdens / δx / ρ
+        end
+    end
+end
+
+function velocities_diff!(
+    dx::ArrayPartition{F, T},
+    x::ArrayPartition{F, T},
+    p::IntegratedModel{N, TVs, TWs, Tmobilities},
+    t
+) where {
+    F,
+    T <: Tuple{Vararg{AbstractVector{<:Real}}},
+    N, TVs, TWs, Tmobilities
+}
+    dens = pwc_densities(x.x...)
+    dens_diff = similar(x)
+    for s in 1:N
+        dens_diff.x[s] .= dens[s][s, 2, :] .- dens[s][s, 1, :]
+    end
+    for spec in 1:N
+        dx.x[spec] .= p.Vs[spec].(t, x.x[spec])
+        for other in 1:N, i in eachindex(x.x[spec])
+            dx.x[spec][i] += integrated_interaction(t, x.x[spec][i], p.Ws[spec][other], x.x[other], dens_diff.x[other])
+        end
+        d = dens[spec]
+        for i in eachindex(dx.x[spec])
+            if dx.x[spec][i] < 0
+                mob = p.mobilities[spec](d[:, 1, i]...)
+            else
+                mob = p.mobilities[spec](d[:, 2, i]...)
+            end
+            dx.x[spec][i] *= mob
+            δdens = d[spec, 2, i] - d[spec, 1, i]
+            if i == 1
+                δx = x.x[spec][2] - x.x[spec][1]
+                ρ = d[spec, 2, 1]
+            elseif i == length(dx.x[spec])
+                δx = x.x[spec][end] - x.x[spec][end-1]
+                ρ = d[spec, 1, end]
+            else
+                δx = (x.x[spec][i+1] - x.x[spec][i-1]) / 2
+                ρ = min(d[spec, 1, i], d[spec, 2, i])
+            end
+            dx.x[spec][i] -= δdens / δx / ρ
+        end
+    end
+end
