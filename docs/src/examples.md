@@ -2,6 +2,8 @@
 
 ## Jupyter Notebook examples
 
+The Jupyter Notebooks can be found in the [`examples`](https://github.com/FedericoStra/ConservationLawsParticles.jl/tree/master/examples) folder.
+
 - [fancy example](Fancy.html) with time-dependend velocity field and interaction,
 - [simple traffic model](Traffic.html),
 - [complex traffic model](Traffic_time-dependent.html) with time-dependent external velocity.
@@ -61,6 +63,8 @@ gif(anim, "simple.gif")
 
 ## Traffic example 1
 
+[`traffic1.jl`](https://github.com/FedericoStra/ConservationLawsParticles.jl/blob/master/examples/traffic1.jl)
+
 ```julia
 using ConservationLawsParticles
 using RecursiveArrayTools, DifferentialEquations, Plots
@@ -102,6 +106,8 @@ gif(anim, "traffic1.gif")
 ![](plots/traffic1.gif)
 
 ## Traffic example 2
+
+[`traffic2.jl`](https://github.com/FedericoStra/ConservationLawsParticles.jl/blob/master/examples/traffic2.jl)
 
 ```julia
 using ConservationLawsParticles
