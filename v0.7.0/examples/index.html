@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Examples · ConservationLawsParticles.jl</title><script data-outdated-warner src="../assets/warner.js"></script><link rel="canonical" href="https://FedericoStra.github.io/ConservationLawsParticles.jl/examples/"/><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.039/juliamono-regular.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.11/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">ConservationLawsParticles.jl</a></span></div><form class="docs-search" action="../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li class="is-active"><a class="tocitem" href>Examples</a><ul class="internal"><li><a class="tocitem" href="#Jupyter-Notebook-examples"><span>Jupyter Notebook examples</span></a></li><li><a class="tocitem" href="#Simple-example"><span>Simple example</span></a></li><li><a class="tocitem" href="#Traffic-example-1"><span>Traffic example 1</span></a></li><li><a class="tocitem" href="#Traffic-example-2"><span>Traffic example 2</span></a></li><li><a class="tocitem" href="#Two-species-example"><span>Two species example</span></a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Examples</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Examples</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/FedericoStra/ConservationLawsParticles.jl/blob/master/docs/src/examples.md#" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Examples"><a class="docs-heading-anchor" href="#Examples">Examples</a><a id="Examples-1"></a><a class="docs-heading-anchor-permalink" href="#Examples" title="Permalink"></a></h1><h2 id="Jupyter-Notebook-examples"><a class="docs-heading-anchor" href="#Jupyter-Notebook-examples">Jupyter Notebook examples</a><a id="Jupyter-Notebook-examples-1"></a><a class="docs-heading-anchor-permalink" href="#Jupyter-Notebook-examples" title="Permalink"></a></h2><p>The Jupyter Notebooks can be found in the <a href="https://github.com/FedericoStra/ConservationLawsParticles.jl/tree/master/examples"><code>examples</code></a> folder.</p><ul><li><a href="../Fancy.html">fancy example</a> with time-dependend velocity field and interaction,</li><li><a href="../Traffic.html">simple traffic model</a>,</li><li><a href="../Traffic_time-dependent.html">complex traffic model</a> with time-dependent external velocity.</li></ul><h2 id="Simple-example"><a class="docs-heading-anchor" href="#Simple-example">Simple example</a><a id="Simple-example-1"></a><a class="docs-heading-anchor-permalink" href="#Simple-example" title="Permalink"></a></h2><p><a href="https://github.com/FedericoStra/ConservationLawsParticles.jl/blob/master/examples/simple.jl"><code>simple.jl</code></a></p><pre><code class="language-julia hljs">using ConservationLawsParticles
+using RecursiveArrayTools, DifferentialEquations, Plots
+
+# model
+V(t, x) = t &lt; 5 ? one(x) : -one(x)
+Wprime(t, x) = sign(x) / (abs(x) + 1)
+W(t, x) = log(abs(x) + 1)
+mob(ρ) = max(1 - ρ, 0)
+smodel = SampledModel((V,), ((Wprime,),), (mob,))
+imodel = IntegratedModel((V,), ((W,),), (mob,))
+
+# initial condition
+x0 = ArrayPartition(vcat(range(0, 1, length=80)))
+
+# time span
+tspan = (0., 10.)
+
+# ODE system for the particles
+sprob = ODEProblem(velocities!, x0, tspan, smodel)
+iprob = ODEProblem(velocities!, x0, tspan, imodel)
+
+abstol = reltol = 1e-7;
+@time ssol = solve(sprob, BS5(); abstol=abstol, reltol=reltol);
+@time isol = solve(iprob, BS5(); abstol=abstol, reltol=reltol);
+
+# plot the particle trajectories
+plot(title=&quot;Trajectories&quot;, xlabel=&quot;time&quot;, ylabel=&quot;position&quot;, legend=false)
+plot!(ssol, vars=1:2:80; color=:blue)
+plot!(isol, vars=1:2:80; color=:red)
+savefig(&quot;simple.png&quot;)</code></pre><p><img src="../plots/simple.png" alt/></p><pre><code class="language-julia hljs"># plot an animation of the density
+anim = @animate for t in range(tspan...; step=1/48)
+    p = plot(title=&quot;Density&quot;, xlabel=&quot;position&quot;, ylabel=&quot;density&quot;,
+        legend=false, xlims=(-2,4), ylims=(0,1))
+    plot_density!(p, ssol(t); color=:blue)
+    plot_density!(p, isol(t); color=:red)
+    p
+end
+gif(anim, &quot;simple.gif&quot;)</code></pre><p><img src="../plots/simple.gif" alt/></p><h2 id="Traffic-example-1"><a class="docs-heading-anchor" href="#Traffic-example-1">Traffic example 1</a><a id="Traffic-example-1-1"></a><a class="docs-heading-anchor-permalink" href="#Traffic-example-1" title="Permalink"></a></h2><p><a href="https://github.com/FedericoStra/ConservationLawsParticles.jl/blob/master/examples/traffic1.jl"><code>traffic1.jl</code></a></p><pre><code class="language-julia hljs">using ConservationLawsParticles
+using RecursiveArrayTools, DifferentialEquations, Plots
+
+# model
+V(t, x) = 3 + (1+sin(3t)) * cos(4x)
+Wprime(t, x) = 2 * sign(x) / (abs(x) + 1)
+mob(ρ) = max(1 - ρ, 0)
+model = SampledModel((V,), ((Wprime,),), (mob,))
+
+# initial condition
+x0 = ArrayPartition(gaussian_particles(2, 801))
+
+# time span
+tspan = (0., 5.)
+
+# ODE system for the particles
+prob = ODEProblem(velocities!, x0, tspan, model)
+
+sol = solve(prob, BS5(); reltol=1e-8, abstol=1e-8)
+
+# plot the particle trajectories
+plot(sol, vars=1:20:801; legend=false, color=:blue,
+    title=&quot;Trajectories&quot;, xlabel=&quot;time&quot;, ylabel=&quot;position&quot;)
+savefig(&quot;traffic1.png&quot;)</code></pre><p><img src="../plots/traffic1.png" alt/></p><pre><code class="language-julia hljs"># plot an animation of the density
+anim = @animate for t in range(tspan...; step=1/48)
+    plot_density(sol(t); color=:blue, legend=false, xlims=(-2,12), ylims=(0,1),
+        title=&quot;Density&quot;, xlabel=&quot;position&quot;, ylabel=&quot;density&quot;)
+end
+gif(anim, &quot;traffic1.gif&quot;)</code></pre><p><img src="../plots/traffic1.gif" alt/></p><h2 id="Traffic-example-2"><a class="docs-heading-anchor" href="#Traffic-example-2">Traffic example 2</a><a id="Traffic-example-2-1"></a><a class="docs-heading-anchor-permalink" href="#Traffic-example-2" title="Permalink"></a></h2><p><a href="https://github.com/FedericoStra/ConservationLawsParticles.jl/blob/master/examples/traffic2.jl"><code>traffic2.jl</code></a></p><pre><code class="language-julia hljs">using ConservationLawsParticles
+using RecursiveArrayTools, DifferentialEquations, Plots
+
+# model
+V(t, x) = 2 + 0.5sin(2x) + 0.3sin(2sqrt(2)*x) + 0.2cos(2sqrt(7)*x)
+W(t, x) = x^2/2 - abs(x)
+W′(t, x) = x - sign(x)
+# W(t, x) = (a=abs(x); a*log(a+1/4))
+# W′(t, x) = (a=abs(x); sign(x) * (log(a+1/4) + a/(a+1/4)))
+mob(ρ) = max((ρ-1)^2 * (2ρ+1), 0)
+smodel = SampledModel((V,), ((W′,),), (mob,))
+imodel = IntegratedModel((V,), ((W,),), (mob,))
+
+# initial condition
+x0 = ArrayPartition(gaussian_particles(2, 401))
+
+# time span
+tspan = (0., 15.)
+
+# ODE system for the particles
+sprob = ODEProblem(velocities_gen!, x0, tspan, smodel)
+iprob = ODEProblem(velocities_gen!, x0, tspan, imodel)
+
+abstol = reltol = 2e-8
+
+@time ssol = solve(sprob, BS5(); abstol=abstol, reltol=reltol);
+@time isol = solve(iprob, BS5(); abstol=abstol, reltol=reltol);
+
+# plot the particle trajectories
+plot(legend=false, title=&quot;Trajectories&quot;, xlabel=&quot;time&quot;, ylabel=&quot;position&quot;)
+plot!(ssol, vars=1:20:401; color=:blue)
+plot!(isol, vars=1:20:401; color=:red)
+savefig(&quot;traffic2.png&quot;)</code></pre><p><img src="../plots/traffic2.png" alt/></p><pre><code class="language-julia hljs"># plot an animation of the density
+anim = @animate for t in range(tspan...; step=1/24)
+    p = plot(legend=false, xlims=(-2,20), ylims=(0,1),
+        title=&quot;Density&quot;, xlabel=&quot;position&quot;, ylabel=&quot;density&quot;)
+    x = ssol(t).x[1]
+    min_dens = minimum(pwc_densities(x)[1][1,:,:], dims=1)[:];
+    plot!(p, repeat(x, inner=(1,2))[1:20:401,:]&#39;,
+        hcat(zero(min_dens), min_dens)[1:20:401,:]&#39;,
+        color=:gray, opacity=.25)
+    plot_density!(p, ssol(t); color=:blue)
+    plot_density!(p, isol(t); color=:red)
+end
+gif(anim, &quot;traffic2.gif&quot;)</code></pre><p><img src="../plots/traffic2.gif" alt/></p><h2 id="Two-species-example"><a class="docs-heading-anchor" href="#Two-species-example">Two species example</a><a id="Two-species-example-1"></a><a class="docs-heading-anchor-permalink" href="#Two-species-example" title="Permalink"></a></h2><pre><code class="language-julia hljs">using ConservationLawsParticles
+using RecursiveArrayTools, DifferentialEquations, Plots
+
+# external velocities
+Vr(t, x) = 2.
+Vl(t, x) = -2.
+# interactions
+W_attr(t, r) = 5 * log(abs(r) + 1)
+W_rep(t, r) = -2 * log(abs(r) + 1)
+W(t, r) = 2 * (exp(abs(r)/4) + exp(-2abs(r)))
+# mobilities
+mobρ(ρ, σ) = max(2 - ρ - 0.5σ, 0)
+mobσ(ρ, σ) = max(2 - σ - 0.5ρ, 0)
+
+imodel = IntegratedModel(
+    (Vr, Vl),
+    ((W, W_rep),
+     (W_rep, W)),
+    (mobρ, mobσ))
+
+n = 20
+x0 = ArrayPartition(
+    vcat(range(-2., -1.5, length=n), range(-1., -.5, length=n)),
+    vcat(range(.5, 1.5, length=2n)))
+
+tspan = (0., 1.2)
+
+prob = ODEProblem(velocities!, x0, tspan, imodel)
+
+sol = solve(prob, BS5(), reltol=1e-6, abstol=1e-6)
+
+plot(legend=false)
+plot!(sol, vars=1:2n, color=:blue)
+plot!(sol, vars=2n+1:4n, color=:red)
+plot!(title=&quot;2-species integrated scheme&quot;, xlabel=&quot;time&quot;, ylabel=&quot;position&quot;)
+
+savefig(&quot;two-species.png&quot;)</code></pre><p><img src="../plots/two-species.png" alt/></p><pre><code class="language-julia hljs">n = 60
+x0 = ArrayPartition(
+    vcat(range(-2., -1.5, length=n), range(-1., -.5, length=n)),
+    vcat(range(.5, 1.5, length=2n)))
+
+prob = ODEProblem(velocities!, x0, tspan, imodel)
+
+sol = solve(prob, BS5(), reltol=1e-7, abstol=1e-7)
+
+anim = @animate for t in tspan[1]:1/48:tspan[2]
+    p = plot(title=&quot;2-species integrated scheme&quot;, xlabel=&quot;position&quot;, ylabel=&quot;density&quot;,
+        legend=false, xlims=(-4,4), ylims=(0,1))
+    plot_density!(p, sol(t).x[1], color=:blue)
+    plot_density!(p, sol(t).x[2], color=:red)
+end
+
+gif(anim, &quot;two-species.gif&quot;)</code></pre><p><img src="../plots/two-species.gif" alt/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.5 on <span class="colophon-date" title="Tuesday 10 August 2021 18:25">Tuesday 10 August 2021</span>. Using Julia version 1.6.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
