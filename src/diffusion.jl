@@ -16,6 +16,12 @@ struct SimpleDiffusion{D}
     diffusion::D
 end
 
+function diffuse!(dx, x, dens, diffusion::Nothing) end
+
+function diffuse!(dx, x, dens, diffusion::Real)
+    diffuse!(dx, x, dens, Diffusion(diffusion))
+end
+
 function diffuse!(dx, x, dens, diffusion::Diffusion{<:Real})
     diffuse!(dx, x, dens, MinDiffusion(diffusion.diffusion))
 end

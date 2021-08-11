@@ -241,7 +241,7 @@ function apply_all_interactions!(dx, x, p::AbstractModel, t, s::Integer, dens_di
     end
 end
 
-function apply_interaction!(dx, x, p::SampledModel, t, s::Integer, o::Integer, dens_diff)
+function apply_interaction!(dx, x, p::Union{SampledModel,DiffusiveSampledModel}, t, s::Integer, o::Integer, dens_diff)
     xs = species(x, s)
     dxs = species(dx, s)
     for i in eachindex(xs)
@@ -249,12 +249,16 @@ function apply_interaction!(dx, x, p::SampledModel, t, s::Integer, o::Integer, d
     end
 end
 
-function apply_interaction!(dx, x, p::IntegratedModel, t, s::Integer, o::Integer, dens_diff)
+function apply_interaction!(dx, x, p::Union{IntegratedModel,DiffusiveIntegratedModel}, t, s::Integer, o::Integer, dens_diff)
     xs = species(x, s)
     dxs = species(dx, s)
     for i in eachindex(xs)
         dxs[i] += integrated_interaction(t, xs[i], interaction(p, s, o), species(x, o), dens_diff)
     end
+end
+
+function apply_diffusion!(dx, x, p::AbstractModel, t, s::Integer, dens)
+    diffuse!(species(dx, s), species(x, s), dens, diffusion(p, s))
 end
 
 
@@ -300,6 +304,7 @@ function abstract_velocities!(
             end
             dxs[i] *= m
         end
+        apply_diffusion!(dx, x, p, t, s, pwc_density(xs))
     end
 end
 
@@ -349,6 +354,7 @@ quote
             end
             dxs[i] *= m
         end
+        apply_diffusion!(dx, x, p, t, $s, pwc_density(xs))
     end for s in eachspecies(p))...)
 end
 end

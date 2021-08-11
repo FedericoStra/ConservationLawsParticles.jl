@@ -1,5 +1,5 @@
 export AbstractModel, SampledModel, IntegratedModel, DiffusiveSampledModel, DiffusiveIntegratedModel
-export num_species, external_velocity, interaction, mobility, eachspecies, species
+export num_species, external_velocity, interaction, mobility, diffusion, eachspecies, species
 
 """
 $(TYPEDEF)
@@ -36,6 +36,13 @@ $(TYPEDSIGNATURES)
 Returns the mobility associated to the species `i`.
 """
 mobility(mod::AbstractModel, i::Integer) = error("unimplemented")
+
+"""
+$(TYPEDSIGNATURES)
+
+Returns the diffusion associated to the species `i`.
+"""
+diffusion(mod::AbstractModel, i::Integer) = error("unimplemented")
 
 """
 $(TYPEDSIGNATURES)
@@ -151,6 +158,9 @@ interaction(mod::IntegratedModel, i::Integer, j::Integer) = mod.Ws[i][j]
 mobility(mod::SampledModel, i::Integer) = mod.mobilities[i]
 mobility(mod::IntegratedModel, i::Integer) = mod.mobilities[i]
 
+diffusion(mod::SampledModel, i::Integer) = nothing
+diffusion(mod::IntegratedModel, i::Integer) = nothing
+
 species(a::ArrayPartition, i::Integer) = a.x[i]
 
 
@@ -180,3 +190,21 @@ mutable struct DiffusiveIntegratedModel{
     mobilities::Tmobilities
     diffusions::Tdiffusions
 end
+
+num_species(mod::DiffusiveSampledModel{N}) where N = N
+num_species(mod::DiffusiveIntegratedModel{N}) where N = N
+
+num_species(mod::Type{<:DiffusiveSampledModel{N}}) where N = N
+num_species(mod::Type{<:DiffusiveIntegratedModel{N}}) where N = N
+
+external_velocity(mod::DiffusiveSampledModel, i::Integer) = mod.Vs[i]
+external_velocity(mod::DiffusiveIntegratedModel, i::Integer) = mod.Vs[i]
+
+interaction(mod::DiffusiveSampledModel, i::Integer, j::Integer) = mod.Wprimes[i][j]
+interaction(mod::DiffusiveIntegratedModel, i::Integer, j::Integer) = mod.Ws[i][j]
+
+mobility(mod::DiffusiveSampledModel, i::Integer) = mod.mobilities[i]
+mobility(mod::DiffusiveIntegratedModel, i::Integer) = mod.mobilities[i]
+
+diffusion(mod::DiffusiveSampledModel, i::Integer) = mod.diffusions[i]
+diffusion(mod::DiffusiveIntegratedModel, i::Integer) = mod.diffusions[i]
