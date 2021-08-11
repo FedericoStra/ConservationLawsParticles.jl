@@ -18,7 +18,7 @@ min_model = DiffusiveSampledModel((V,), ((W′,),), (mob,), (MinDiffusion(1),))
 
 # initial condition
 Random.seed!(42)
-n = 20
+n = 40
 x0 = ArrayPartition(sort(vcat(randn(n) .- 1, .5randn(n) .+ 1)))
 
 # time span
@@ -32,14 +32,14 @@ min_prob = ODEProblem(velocities_diff!, x0, tspan, min_model)
 abstol = reltol = 2e-7
 
 @time simple_sol = solve(simple_prob, BS5(); abstol=abstol, reltol=reltol);
-@time mean_sol = solve(mean_prob, BS5(); abstol=abstol, reltol=reltol);
+@time mean_sol = solve(mean_prob, BS5(); abstol=.5abstol, reltol=.5reltol);
 @time min_sol = solve(min_prob, BS5(); abstol=abstol, reltol=reltol);
 
 # plot the particle trajectories
 plot(title="Trajectories", xlabel="time", ylabel="position", legend=false)
-plot!(simple_sol, vars=eachindex(x0)[1:1:end], color=1)
-plot!(mean_sol, vars=eachindex(x0)[1:1:end], color=2)
-plot!(min_sol, vars=eachindex(x0)[1:1:end], color=3)
+plot!(simple_sol, vars=eachindex(x0)[1:5:end], color=1)
+plot!(mean_sol, vars=eachindex(x0)[1:5:end], color=2)
+plot!(min_sol, vars=eachindex(x0)[1:5:end], color=3)
 savefig("diffusion7.png")
 
 # plot an animation of the density
