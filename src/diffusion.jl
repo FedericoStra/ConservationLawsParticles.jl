@@ -61,6 +61,6 @@ end
 function diffuse!(dx, x, dens, diffusion::SimpleDiffusion{<:Real})
     for i in eachindex(dx)
         δdens = dens[i+1] - dens[i]
-        dx[i] -= diffusion.diffusion * (length(dx) - 1) * δdens
+        dx[i] -= diffusion.diffusion * length(dx) * δdens
     end
 end
