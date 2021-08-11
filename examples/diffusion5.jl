@@ -8,8 +8,8 @@ V(t, x) = 0.0 # 2 + 0.5sin(2x) + 0.3sin(2sqrt(2)*x) + 0.2cos(2sqrt(7)*x)
 W(t, x) = 0.0 # x^2/2 - abs(x)
 W′(t, x) = 0.0 # x - sign(x)
 mob(ρ) = 0.0 # max((ρ-1)^2 * (2ρ+1), 0)
-smodel = SampledModel((V,), ((W′,),), (mob,))
-imodel = IntegratedModel((V,), ((W,),), (mob,))
+smodel = DiffusiveSampledModel((V,), ((W′,),), (mob,), (Diffusion(1),))
+imodel = DiffusiveIntegratedModel((V,), ((W,),), (mob,), (Diffusion(1),))
 
 # initial condition
 x0 = ArrayPartition(sort(randn(50)))

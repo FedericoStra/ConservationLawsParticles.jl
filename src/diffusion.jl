@@ -1,4 +1,8 @@
-export MinDiffusion, MeanDiffusion, SimpleDiffusion, diffuse!
+export Diffusion, MinDiffusion, MeanDiffusion, SimpleDiffusion, diffuse!
+
+struct Diffusion{D}
+    diffusion::D
+end
 
 struct MinDiffusion{D}
     diffusion::D
@@ -12,15 +16,19 @@ struct SimpleDiffusion{D}
     diffusion::D
 end
 
+function diffuse!(dx, x, dens, dens_diff, diffusion::Diffusion{<:Real})
+    diffuse!(dx, x, dens, dens_diff, MinDiffusion(diffusion.diffusion))
+end
+
 function diffuse!(dx, x, dens, dens_diff, diffusion::MinDiffusion{<:Real})
     for i in eachindex(dx)
         δdens = dens[i+1] - dens[i]
         if i == 1
             δx = x[2] - x[1]
-            ρ = dens[2] / 2
+            ρ = dens[2]
         elseif i == length(dx)
             δx = x[end] - x[end-1]
-            ρ = dens[end-1] / 2
+            ρ = dens[end-1]
         else
             δx = (x[i+1] - x[i-1]) / 2
             ρ = min(dens[i], dens[i+1])
