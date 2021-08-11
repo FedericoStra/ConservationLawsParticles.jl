@@ -1,4 +1,4 @@
-export AbstractModel, SampledModel, IntegratedModel
+export AbstractModel, SampledModel, IntegratedModel, DiffusiveSampledModel, DiffusiveIntegratedModel
 export num_species, external_velocity, interaction, mobility, eachspecies, species
 
 """
@@ -152,3 +152,31 @@ mobility(mod::SampledModel, i::Integer) = mod.mobilities[i]
 mobility(mod::IntegratedModel, i::Integer) = mod.mobilities[i]
 
 species(a::ArrayPartition, i::Integer) = a.x[i]
+
+
+
+mutable struct DiffusiveSampledModel{
+    N,
+    TVs         <: Tuple{Vararg{Any,N}},
+    TWprimes    <: Tuple{Vararg{Tuple{Vararg{Any,N}},N}},
+    Tmobilities <: Tuple{Vararg{Any,N}},
+    Tdiffusions <: Tuple{Vararg{Any,N}}
+} <: AbstractModel
+    Vs::TVs
+    Wprimes::TWprimes
+    mobilities::Tmobilities
+    diffusions::Tdiffusions
+end
+
+mutable struct DiffusiveIntegratedModel{
+    N,
+    TVs         <: Tuple{Vararg{Any,N}},
+    TWs         <: Tuple{Vararg{Tuple{Vararg{Any,N}},N}},
+    Tmobilities <: Tuple{Vararg{Any,N}},
+    Tdiffusions <: Tuple{Vararg{Any,N}}
+} <: AbstractModel
+    Vs::TVs
+    Ws::TWs
+    mobilities::Tmobilities
+    diffusions::Tdiffusions
+end

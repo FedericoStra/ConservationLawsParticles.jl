@@ -358,7 +358,7 @@ export velocities_diff, velocities_diff!
 
 function velocities_diff(
     x::ArrayPartition{F, T},
-    p::Union{SampledModel, IntegratedModel},
+    p::Union{DiffusiveSampledModel, DiffusiveIntegratedModel},
     t
 ) where {
     F,
@@ -372,12 +372,12 @@ end
 function velocities_diff!(
     dx::ArrayPartition{F, T},
     x::ArrayPartition{F, T},
-    p::SampledModel{N, TVs, TWprimes, Tmobilities},
+    p::DiffusiveSampledModel{N, TVs, TWprimes, Tmobilities, Tdiffusions},
     t
 ) where {
     F,
     T <: Tuple{Vararg{AbstractVector{<:Real}}},
-    N, TVs, TWprimes, Tmobilities
+    N, TVs, TWprimes, Tmobilities, Tdiffusions
 }
     dens = pwc_densities(x.x...)
     for spec in 1:N
@@ -393,31 +393,21 @@ function velocities_diff!(
                 mob = p.mobilities[spec](d[:, 2, i]...)
             end
             dx.x[spec][i] *= mob
-            δdens = d[spec, 2, i] - d[spec, 1, i]
-            if i == 1
-                δx = x.x[spec][2] - x.x[spec][1]
-                ρ = d[spec, 2, 1]
-            elseif i == length(dx.x[spec])
-                δx = x.x[spec][end] - x.x[spec][end-1]
-                ρ = d[spec, 1, end]
-            else
-                δx = (x.x[spec][i+1] - x.x[spec][i-1]) / 2
-                ρ = min(d[spec, 1, i], d[spec, 2, i])
-            end
-            dx.x[spec][i] -= δdens / δx / ρ
         end
+        d = pwc_density(x.x[spec])
+        diffuse!(dx.x[spec], x.x[spec], d, diff(d), p.diffusions[spec])
     end
 end
 
 function velocities_diff!(
     dx::ArrayPartition{F, T},
     x::ArrayPartition{F, T},
-    p::IntegratedModel{N, TVs, TWs, Tmobilities},
+    p::DiffusiveIntegratedModel{N, TVs, TWs, Tmobilities, Tdiffusions},
     t
 ) where {
     F,
     T <: Tuple{Vararg{AbstractVector{<:Real}}},
-    N, TVs, TWs, Tmobilities
+    N, TVs, TWs, Tmobilities, Tdiffusions
 }
     dens = pwc_densities(x.x...)
     dens_diff = similar(x)
@@ -437,18 +427,8 @@ function velocities_diff!(
                 mob = p.mobilities[spec](d[:, 2, i]...)
             end
             dx.x[spec][i] *= mob
-            δdens = d[spec, 2, i] - d[spec, 1, i]
-            if i == 1
-                δx = x.x[spec][2] - x.x[spec][1]
-                ρ = d[spec, 2, 1]
-            elseif i == length(dx.x[spec])
-                δx = x.x[spec][end] - x.x[spec][end-1]
-                ρ = d[spec, 1, end]
-            else
-                δx = (x.x[spec][i+1] - x.x[spec][i-1]) / 2
-                ρ = min(d[spec, 1, i], d[spec, 2, i])
-            end
-            dx.x[spec][i] -= δdens / δx / ρ
         end
+        d = pwc_density(x.x[spec])
+        diffuse!(dx.x[spec], x.x[spec], d, diff(d), p.diffusions[spec])
     end
 end
