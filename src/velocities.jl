@@ -394,8 +394,7 @@ function velocities_diff!(
             end
             dx.x[spec][i] *= mob
         end
-        d = pwc_density(x.x[spec])
-        diffuse!(dx.x[spec], x.x[spec], d, diff(d), p.diffusions[spec])
+        diffuse!(dx.x[spec], x.x[spec], pwc_density(x.x[spec]), p.diffusions[spec])
     end
 end
 
@@ -428,7 +427,6 @@ function velocities_diff!(
             end
             dx.x[spec][i] *= mob
         end
-        d = pwc_density(x.x[spec])
-        diffuse!(dx.x[spec], x.x[spec], d, diff(d), p.diffusions[spec])
+        diffuse!(dx.x[spec], x.x[spec], pwc_density(x.x[spec]), p.diffusions[spec])
     end
 end

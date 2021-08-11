@@ -16,11 +16,11 @@ struct SimpleDiffusion{D}
     diffusion::D
 end
 
-function diffuse!(dx, x, dens, dens_diff, diffusion::Diffusion{<:Real})
-    diffuse!(dx, x, dens, dens_diff, MinDiffusion(diffusion.diffusion))
+function diffuse!(dx, x, dens, diffusion::Diffusion{<:Real})
+    diffuse!(dx, x, dens, MinDiffusion(diffusion.diffusion))
 end
 
-function diffuse!(dx, x, dens, dens_diff, diffusion::MinDiffusion{<:Real})
+function diffuse!(dx, x, dens, diffusion::MinDiffusion{<:Real})
     for i in eachindex(dx)
         δdens = dens[i+1] - dens[i]
         if i == 1
@@ -37,7 +37,7 @@ function diffuse!(dx, x, dens, dens_diff, diffusion::MinDiffusion{<:Real})
     end
 end
 
-function diffuse!(dx, x, dens, dens_diff, diffusion::MeanDiffusion{<:Real})
+function diffuse!(dx, x, dens, diffusion::MeanDiffusion{<:Real})
     for i in eachindex(dx)
         δdens = dens[i+1] - dens[i]
         if i == 1
@@ -52,8 +52,9 @@ function diffuse!(dx, x, dens, dens_diff, diffusion::MeanDiffusion{<:Real})
     end
 end
 
-function diffuse!(dx, x, dens, dens_diff, diffusion::SimpleDiffusion{<:Real})
+function diffuse!(dx, x, dens, diffusion::SimpleDiffusion{<:Real})
     for i in eachindex(dx)
-        dx[i] -= diffusion.diffusion * (length(dx) - 1) * dens_diff[i]
+        δdens = dens[i+1] - dens[i]
+        dx[i] -= diffusion.diffusion * (length(dx) - 1) * δdens
     end
 end
