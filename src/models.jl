@@ -92,6 +92,7 @@ mutable struct SampledModel{
     mobilities::Tmobilities
 end
 
+SampledModel(V, Wprime, mob) = SampledModel((V,), ((Wprime,),), (mob,))
 
 """
     IntegratedModel((V₁, ...), ((W₁₁, ...), ...), (mob₁, ...)
@@ -133,6 +134,7 @@ mutable struct IntegratedModel{
     mobilities::Tmobilities
 end
 
+IntegratedModel(V, W, mob) = IntegratedModel((V,), ((W,),), (mob,))
 
 num_species(mod::SampledModel{N}) where N = N
 num_species(mod::IntegratedModel{N}) where N = N
