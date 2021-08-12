@@ -66,11 +66,11 @@ function integrated_interaction(t::Real, x::Real, W, ys::AbstractVector{<:Real},
 end
 
 
-struct SampledInteraction
-    Wprime
+struct SampledInteraction{TWprime}
+    Wprime::TWprime
 end
 
-struct IntegratedInteraction
+struct IntegratedInteraction{TW}
     W
 end
 
