@@ -1,3 +1,5 @@
+export pwc_density, pwc_densities, pwc_densities!
+
 """
     pwc_density(x::AbstractVector)
 
@@ -111,11 +113,27 @@ end
 """
     pwc_densities(xs::AbstractVector...)
 """
-function pwc_densities(xs::Vararg{AbstractVector{<:Real}, N}) where N
-    N::Int
+
+function pwc_densities(xs::AbstractVector{<:Real}...)
+    pwc_densities(xs)
+end
+
+function pwc_densities!(dens, xs::AbstractVector{<:Real}...)
+    pwc_densities!(dens, xs)
+end
+
+function pwc_densities(xs::Tuple{Vararg{AbstractVector{<:Real}}})
+    N = nfields(xs)
     T = promote_type(float.(eltype.(xs))...)
     len = length.(xs)
     dens = map(x -> new_undef_densities(T, N, length(x)), xs)::NTuple{N, Array{T, 3}}
+    pwc_densities!(dens, xs)
+end
+
+function pwc_densities!(dens, xs::Tuple{Vararg{AbstractVector{<:Real}}})
+    N = nfields(xs)
+    T = promote_type(float.(eltype.(xs))...)
+    len = length.(xs)
     # indices of current particles being examined
     ind = ones(Int, N)
     # current densities

@@ -12,6 +12,4 @@ include("velocities.jl")
 include("plotting.jl")
 include("examples.jl")
 
-export pwc_density, pwc_densities
-
 end # module
