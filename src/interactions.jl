@@ -72,7 +72,7 @@ struct SampledInteraction{TWprime}
 end
 
 struct IntegratedInteraction{TW}
-    W
+    W::TW
 end
 
 
