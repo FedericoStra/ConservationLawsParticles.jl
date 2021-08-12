@@ -1,4 +1,5 @@
-export sampled_interaction, integrated_interaction
+export SampledInteraction, IntegratedInteraction
+export sampled_interaction, integrated_interaction, compute_interaction
 
 
 @doc raw"""
@@ -62,4 +63,21 @@ end
 
 function integrated_interaction(t::Real, x::Real, W, ys::AbstractVector{<:Real}, dens_diff::AbstractVector{<:Real}=diff(pwc_density(ys)))
     -sum(i -> dens_diff[i] * W(t, x - ys[i]), eachindex(ys))
+end
+
+
+struct SampledInteraction
+    Wprime
+end
+
+struct IntegratedInteraction
+    W
+end
+
+function compute_interaction(t::Real, x::Real, int::SampledInteraction, ys::AbstractVector{<:Real}, dens_diff::AbstractVector{<:Real}=Float16[])
+    sampled_interaction(t, x, int.Wprime, ys)
+end
+
+function compute_interaction(t::Real, x::Real, int::IntegratedInteraction, ys::AbstractVector{<:Real}, dens_diff::AbstractVector{<:Real}=diff(pwc_density(ys)))
+    integrated_interaction(t, x, int.W, ys, dens_diff)
 end
