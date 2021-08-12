@@ -1,5 +1,6 @@
 export AbstractModel, SampledModel, IntegratedModel, DiffusiveSampledModel, DiffusiveIntegratedModel, HyperbolicModel, ParabolicModel
 export num_species, external_velocity, interaction, mobility, diffusion, eachspecies, species
+export SM, IM, DSM, DIM, HM, PM
 
 
 """
@@ -255,3 +256,11 @@ mobility(mod::ParabolicModel, i::Integer) = mod.mobs[i]
 
 diffusion(mod::HyperbolicModel, i::Integer) = nothing
 diffusion(mod::ParabolicModel, i::Integer) = mod.difs[i]
+
+
+const SM = SampledModel
+const IM = IntegratedModel
+const DSM = DiffusiveSampledModel
+const DIM = DiffusiveIntegratedModel
+const HM = HyperbolicModel
+const PM = ParabolicModel
