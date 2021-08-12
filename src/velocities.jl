@@ -25,7 +25,7 @@ function velocities!(
     T <: Tuple{Vararg{AbstractVector{<:Real}}},
     N, TVs, TWprimes, Tmobilities
 }
-    dens = pwc_densities(x.x...)
+    dens = pwc_densities(x.x)
     for spec in 1:N
         dx.x[spec] .= p.Vs[spec].(t, x.x[spec])
         for other in 1:N, i in eachindex(x.x[spec])
@@ -56,7 +56,7 @@ function velocities!(
     T <: Tuple{Vararg{AbstractVector{<:Real}}},
     N, TVs, TWs, Tmobilities
 }
-    dens = pwc_densities(x.x...)
+    dens = pwc_densities(x.x)
     dens_diff = similar(x)
     for s in 1:N
         dens_diff.x[s] .= dens[s][s, 2, :] .- dens[s][s, 1, :]
@@ -103,7 +103,7 @@ end
     N, TVs, TWprimes, Tmobilities
 }
 quote
-    dens = pwc_densities(x.x...)
+    dens = pwc_densities(x.x)
     $((quote
         dx.x[$spec] .= p.Vs[$spec].(t, x.x[$spec])
         $((quote
@@ -135,7 +135,7 @@ end
     N, TVs, TWs, Tmobilities
 }
 quote
-    dens = pwc_densities(x.x...)
+    dens = pwc_densities(x.x)
     dens_diff = similar(x)
     for s in 1:N
         dens_diff.x[s] .= dens[s][s, 2, :] .- dens[s][s, 1, :]
@@ -205,7 +205,7 @@ function make_velocities(
             p,
             t
             ) where F where T<:Tuple{Vararg{AbstractVector{<:Real}}}
-        dens = pwc_densities(x.x...)
+        dens = pwc_densities(x.x)
         for spec in 1:N
             for i in 1:length(x.x[spec])
                 v::F = Vs[spec](t, x.x[spec][i])
@@ -292,7 +292,7 @@ function abstract_velocities!(
     F,
     T <: Tuple{Vararg{AbstractVector{<:Real}}},
 }
-    dens = pwc_densities(x.x...)
+    dens = pwc_densities(x.x)
     dens_diff = similar(x)
     for s in eachspecies(p)
         dens_diff.x[s] .= dens[s][s, 2, :] .- dens[s][s, 1, :]
@@ -325,7 +325,7 @@ function abstract_velocities!(
     F,
     T <: Tuple{Vararg{AbstractVector{<:Real}}},
 }
-    dens = pwc_densities(x.x...)
+    dens = pwc_densities(x.x)
     dens_diff = similar(x)
     for s in eachspecies(p)
         dens_diff.x[s] .= dens[s][s, 2, :] .- dens[s][s, 1, :]
@@ -373,7 +373,7 @@ end
     T <: Tuple{Vararg{AbstractVector{<:Real}}},
 }
 quote
-    dens = pwc_densities(x.x...)
+    dens = pwc_densities(x.x)
     dens_diff = similar(x)
     for s in eachspecies(p)
         dens_diff.x[s] .= dens[s][s, 2, :] .- dens[s][s, 1, :]
@@ -426,7 +426,7 @@ function velocities_diff!(
     T <: Tuple{Vararg{AbstractVector{<:Real}}},
     N, TVs, TWprimes, Tmobilities, Tdiffusions
 }
-    dens = pwc_densities(x.x...)
+    dens = pwc_densities(x.x)
     for spec in 1:N
         dx.x[spec] .= p.Vs[spec].(t, x.x[spec])
         for other in 1:N, i in eachindex(x.x[spec])
@@ -455,7 +455,7 @@ function velocities_diff!(
     T <: Tuple{Vararg{AbstractVector{<:Real}}},
     N, TVs, TWs, Tmobilities, Tdiffusions
 }
-    dens = pwc_densities(x.x...)
+    dens = pwc_densities(x.x)
     dens_diff = similar(x)
     for s in 1:N
         dens_diff.x[s] .= dens[s][s, 2, :] .- dens[s][s, 1, :]
