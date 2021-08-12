@@ -7,7 +7,7 @@ $(TYPEDEF)
 
 Abstract type representing a particle model.
 """
-abstract type AbstractModel end
+abstract type AbstractModel{N} end
 
 
 """
@@ -96,7 +96,7 @@ struct SampledModel{
     TVs         <: Tuple{Vararg{Any,N}},
     TWprimes    <: Tuple{Vararg{Tuple{Vararg{Any,N}},N}},
     Tmobilities <: Tuple{Vararg{Any,N}},
-} <: AbstractModel
+} <: AbstractModel{N}
     Vs::TVs
     Wprimes::TWprimes
     mobilities::Tmobilities
@@ -139,7 +139,7 @@ struct IntegratedModel{
     TVs         <: Tuple{Vararg{Any,N}},
     TWs         <: Tuple{Vararg{Tuple{Vararg{Any,N}},N}},
     Tmobilities <: Tuple{Vararg{Any,N}},
-} <: AbstractModel
+} <: AbstractModel{N}
     Vs::TVs
     Ws::TWs
     mobilities::Tmobilities
@@ -173,7 +173,7 @@ struct DiffusiveSampledModel{
     TWprimes    <: Tuple{Vararg{Tuple{Vararg{Any,N}},N}},
     Tmobilities <: Tuple{Vararg{Any,N}},
     Tdiffusions <: Tuple{Vararg{Any,N}}
-} <: AbstractModel
+} <: AbstractModel{N}
     Vs::TVs
     Wprimes::TWprimes
     mobilities::Tmobilities
@@ -186,7 +186,7 @@ struct DiffusiveIntegratedModel{
     TWs         <: Tuple{Vararg{Tuple{Vararg{Any,N}},N}},
     Tmobilities <: Tuple{Vararg{Any,N}},
     Tdiffusions <: Tuple{Vararg{Any,N}}
-} <: AbstractModel
+} <: AbstractModel{N}
     Vs::TVs
     Ws::TWs
     mobilities::Tmobilities
@@ -218,7 +218,7 @@ struct HyperbolicModel{
     TVs <: NTuple{N,Any},
     TIs <: NTuple{N,NTuple{N,Any}},
     TMs <: NTuple{N,Any}
-} <: AbstractModel
+} <: AbstractModel{N}
     vels::TVs
     ints::TIs
     mobs::TMs
@@ -230,7 +230,7 @@ struct ParabolicModel{
     TIs <: NTuple{N,NTuple{N,Any}},
     TMs <: NTuple{N,Any},
     TDs <: NTuple{N,Any}
-} <: AbstractModel
+} <: AbstractModel{N}
     vels::TVs
     ints::TIs
     mobs::TMs
