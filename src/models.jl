@@ -1,12 +1,14 @@
 export AbstractModel, SampledModel, IntegratedModel, DiffusiveSampledModel, DiffusiveIntegratedModel
 export num_species, external_velocity, interaction, mobility, diffusion, eachspecies, species
 
+
 """
 $(TYPEDEF)
 
 Abstract type representing a particle model.
 """
 abstract type AbstractModel end
+
 
 """
 $(TYPEDSIGNATURES)
@@ -58,6 +60,7 @@ $(TYPEDSIGNATURES)
 Returns the particles associated to the species `i`.
 """
 species(state, i::Integer) = error("unimplemented")
+species(a::ArrayPartition, i::Integer) = a.x[i]
 
 """
     SampledModel((V₁, ...), ((W′₁₁, ...), ...), (mob₁, ...)
@@ -88,7 +91,7 @@ julia> velocities(x, model, 0.)
 ([6.291136247066298, 0.2466663161150116, -0.7218917091339228, -7.22630670503873], [22.405129478914613, 1.1249366684885518, 1.5188519354999799, -7.87111869358889, -54.536397957423915])
 ```
 """
-mutable struct SampledModel{
+struct SampledModel{
     N,
     TVs         <: Tuple{Vararg{Any,N}},
     TWprimes    <: Tuple{Vararg{Tuple{Vararg{Any,N}},N}},
@@ -100,6 +103,7 @@ mutable struct SampledModel{
 end
 
 SampledModel(V, Wprime, mob) = SampledModel((V,), ((Wprime,),), (mob,))
+
 
 """
     IntegratedModel((V₁, ...), ((W₁₁, ...), ...), (mob₁, ...)
@@ -130,7 +134,7 @@ julia> velocities(x, model, 0.)
 ([6.621647425385332, 0.30545649966452776, -0.42671180044513507, -6.914302510772401], [23.261098611816987, 0.9023583690557855, 0.7055593913708742, -8.774526834146023, -55.23308442021724])
 ```
 """
-mutable struct IntegratedModel{
+struct IntegratedModel{
     N,
     TVs         <: Tuple{Vararg{Any,N}},
     TWs         <: Tuple{Vararg{Tuple{Vararg{Any,N}},N}},
@@ -142,6 +146,7 @@ mutable struct IntegratedModel{
 end
 
 IntegratedModel(V, W, mob) = IntegratedModel((V,), ((W,),), (mob,))
+
 
 num_species(mod::SampledModel{N}) where N = N
 num_species(mod::IntegratedModel{N}) where N = N
@@ -161,11 +166,8 @@ mobility(mod::IntegratedModel, i::Integer) = mod.mobilities[i]
 diffusion(mod::SampledModel, i::Integer) = nothing
 diffusion(mod::IntegratedModel, i::Integer) = nothing
 
-species(a::ArrayPartition, i::Integer) = a.x[i]
 
-
-
-mutable struct DiffusiveSampledModel{
+struct DiffusiveSampledModel{
     N,
     TVs         <: Tuple{Vararg{Any,N}},
     TWprimes    <: Tuple{Vararg{Tuple{Vararg{Any,N}},N}},
@@ -178,7 +180,7 @@ mutable struct DiffusiveSampledModel{
     diffusions::Tdiffusions
 end
 
-mutable struct DiffusiveIntegratedModel{
+struct DiffusiveIntegratedModel{
     N,
     TVs         <: Tuple{Vararg{Any,N}},
     TWs         <: Tuple{Vararg{Tuple{Vararg{Any,N}},N}},
@@ -190,6 +192,7 @@ mutable struct DiffusiveIntegratedModel{
     mobilities::Tmobilities
     diffusions::Tdiffusions
 end
+
 
 num_species(mod::DiffusiveSampledModel{N}) where N = N
 num_species(mod::DiffusiveIntegratedModel{N}) where N = N
