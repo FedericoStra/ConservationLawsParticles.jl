@@ -22,7 +22,7 @@ function diffuse!(dx, x, dens, diffusion::Real)
     diffuse!(dx, x, dens, Diffusion(diffusion))
 end
 
-function diffuse!(dx, x, dens, diffusion::Diffusion{<:Real})
+function diffuse!(dx, x, dens, diffusion::Diffusion)
     diffuse!(dx, x, dens, MinDiffusion(diffusion.diffusion))
 end
 
@@ -62,5 +62,47 @@ function diffuse!(dx, x, dens, diffusion::SimpleDiffusion{<:Real})
     for i in eachindex(dx)
         δdens = dens[i+1] - dens[i]
         dx[i] -= diffusion.diffusion * length(dx) * δdens
+    end
+end
+
+function diffuse!(dx, x, dens, diffusion::MinDiffusion)
+    A = diffusion.diffusion
+    for i in eachindex(dx)
+        δA = A(dens[i+1]) - A(dens[i])
+        if i == 1
+            δx = x[2] - x[1]
+            ρ = dens[2]
+        elseif i == length(dx)
+            δx = x[end] - x[end-1]
+            ρ = dens[end-1]
+        else
+            δx = (x[i+1] - x[i-1]) / 2
+            ρ = min(dens[i], dens[i+1])
+        end
+        dx[i] -= δA / δx / ρ
+    end
+end
+
+function diffuse!(dx, x, dens, diffusion::MeanDiffusion)
+    A = diffusion.diffusion
+    for i in eachindex(dx)
+        δA = A(dens[i+1]) - A(dens[i])
+        if i == 1
+            δx = x[2] - x[1]
+        elseif i == length(dx)
+            δx = x[end] - x[end-1]
+        else
+            δx = (x[i+1] - x[i-1]) / 2
+        end
+        ρ = (dens[i] + dens[i+1]) / 2
+        dx[i] -= δA / δx / ρ
+    end
+end
+
+function diffuse!(dx, x, dens, diffusion::SimpleDiffusion)
+    A = diffusion.diffusion
+    for i in eachindex(dx)
+        δA = A(dens[i+1]) - A(dens[i])
+        dx[i] -= length(dx) * δA
     end
 end
