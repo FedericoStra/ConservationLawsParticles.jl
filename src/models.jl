@@ -63,8 +63,9 @@ Returns the particles associated to the species `i`.
 species(state, i::Integer) = error("unimplemented")
 species(a::ArrayPartition, i::Integer) = a.x[i]
 
+
 """
-    SampledModel((V₁, ...), ((W′₁₁, ...), ...), (mob₁, ...)
+    SampledModel((V₁, ...), ((W′₁₁, ...), ...), (mob₁, ...))
 
 Represents a particles system with:
 
@@ -76,7 +77,7 @@ See also [`IntegratedModel`](@ref).
 
 # Examples
 
-```jldoctest; setup = :(using ConservationLawsParticles)
+```jldoctest
 julia> using ConservationLawsParticles.Examples, RecursiveArrayTools
 
 julia> model = SampledModel(
@@ -107,7 +108,7 @@ SampledModel(V, Wprime, mob) = SampledModel((V,), ((Wprime,),), (mob,))
 
 
 """
-    IntegratedModel((V₁, ...), ((W₁₁, ...), ...), (mob₁, ...)
+    IntegratedModel((V₁, ...), ((W₁₁, ...), ...), (mob₁, ...))
 
 Represents a particles system with:
 
@@ -119,7 +120,7 @@ See also [`SampledModel`](@ref).
 
 # Examples
 
-```jldoctest; setup = :(using ConservationLawsParticles)
+```jldoctest
 julia> using ConservationLawsParticles.Examples, RecursiveArrayTools
 
 julia> model = IntegratedModel(
@@ -168,6 +169,37 @@ diffusion(mod::SampledModel, i::Integer) = nothing
 diffusion(mod::IntegratedModel, i::Integer) = nothing
 
 
+"""
+    DiffusiveSampledModel((V₁, ...), ((W′₁₁, ...), ...), (mob₁, ...), (D₁, ...))
+
+Represents a particles system with:
+
+- external velocities `Vᵢ`,
+- sampled interactions `W′ᵢⱼ` (this is the effect of the species `j` on the species `i`),
+- mobilities `mobᵢ`,
+- diffusions `Dᵢ`.
+
+See also [`DiffusiveIntegratedModel`](@ref).
+
+# Examples
+
+```jldoctest
+julia> using ConservationLawsParticles.Examples, RecursiveArrayTools
+
+julia> model = DiffusiveSampledModel(
+           (V, V),
+           ((Wprime_attr, Wprime_rep),
+            (Wprime_rep, Wprime_attr)),
+           (mobρ, mobσ),
+           (Diffusion(1), nothing));
+
+julia> x = ArrayPartition(gaussian_particles(2, 4), collect(range(-3, 4, length=5)))
+([-2.000000000000003, -0.30305473018369145, 0.30305473018369145, 2.000000000000003], [-3.0, -1.25, 0.5, 2.25, 4.0])
+
+julia> velocities_diff(x, model, 0.)
+([5.701842050142524, -1.3162440100303214, 0.8410186170114102, -6.637012508114956], [22.405129478914613, 1.1249366684885518, 1.5188519354999799, -7.87111869358889, -54.536397957423915])
+```
+"""
 struct DiffusiveSampledModel{
     N,
     TVs         <: Tuple{Vararg{Any,N}},
@@ -181,6 +213,37 @@ struct DiffusiveSampledModel{
     diffusions::Tdiffusions
 end
 
+"""
+    DiffusiveIntegratedModel((V₁, ...), ((W₁₁, ...), ...), (mob₁, ...), (D₁, ...))
+
+Represents a particles system with:
+
+- external velocities `Vᵢ`,
+- integrated interactions `Wᵢⱼ` (this is the effect of the species `j` on the species `i`),
+- mobilities `mobᵢ`,
+- diffusions `Dᵢ`.
+
+See also [`DiffusiveSampledModel`](@ref).
+
+# Examples
+
+```jldoctest
+julia> using ConservationLawsParticles.Examples, RecursiveArrayTools
+
+julia> model = DiffusiveIntegratedModel(
+           (V, V),
+           ((W_attr, W_rep),
+            (W_rep, W_attr)),
+           (mobρ, mobσ),
+           (Diffusion(1), nothing));
+
+julia> x = ArrayPartition(gaussian_particles(2, 4), collect(range(-3, 4, length=5)))
+([-2.000000000000003, -0.30305473018369145, 0.30305473018369145, 2.000000000000003], [-3.0, -1.25, 0.5, 2.25, 4.0])
+
+julia> velocities_diff(x, model, 0.)
+([6.032353228461558, -1.2574538264808053, 1.1361985257001979, -6.3250083138486275], [23.261098611816987, 0.9023583690557855, 0.7055593913708742, -8.774526834146023, -55.23308442021724])
+```
+"""
 struct DiffusiveIntegratedModel{
     N,
     TVs         <: Tuple{Vararg{Any,N}},
@@ -214,6 +277,35 @@ diffusion(mod::DiffusiveSampledModel, i::Integer) = mod.diffusions[i]
 diffusion(mod::DiffusiveIntegratedModel, i::Integer) = mod.diffusions[i]
 
 
+"""
+    HyperbolicModel((V₁, ...), ((I₁₁, ...), ...), (mob₁, ...))
+
+Represents a particles system with:
+
+- external velocities `Vᵢ`,
+- integrated interactions `Iᵢⱼ` (this is the effect of the species `j` on the species `i`),
+- mobilities `mobᵢ`.
+
+See also [`ParabolicModel`](@ref).
+
+# Examples
+
+```jldoctest
+julia> using ConservationLawsParticles.Examples, RecursiveArrayTools
+
+julia> model = HyperbolicModel(
+           (V, V),
+           ((SampledInteraction(Wprime_attr), IntegratedInteraction(W_rep)),
+            (IntegratedInteraction(W_rep), SampledInteraction(Wprime_attr))),
+           (mobρ, mobσ));
+
+julia> x = ArrayPartition(gaussian_particles(2, 4), collect(range(-3, 4, length=5)))
+([-2.000000000000003, -0.30305473018369145, 0.30305473018369145, 2.000000000000003], [-3.0, -1.25, 0.5, 2.25, 4.0])
+
+julia> abstract_velocities(x, model, 0.)
+([6.267901451064502, 0.2629261335925302, -0.3841814343731375, -6.560556536451573], [22.921033907881895, 0.8199108735979148, 0.7055593913708742, -8.681409489341364, -54.89301971628215])
+```
+"""
 struct HyperbolicModel{
     N,
     TVs <: NTuple{N,Any},
@@ -225,6 +317,38 @@ struct HyperbolicModel{
     mobs::TMs
 end
 
+
+"""
+    ParabolicModel((V₁, ...), ((I₁₁, ...), ...), (mob₁, ...), (D₁, ...))
+
+Represents a particles system with:
+
+- external velocities `Vᵢ`,
+- interactions `Iᵢⱼ` (this is the effect of the species `j` on the species `i`),
+- mobilities `mobᵢ`,
+- diffusions `Dᵢ`.
+
+See also [`HyperbolicModel`](@ref).
+
+# Examples
+
+```jldoctest
+julia> using ConservationLawsParticles.Examples, RecursiveArrayTools
+
+julia> model = ParabolicModel(
+           (V, V),
+           ((SampledInteraction(Wprime_attr), IntegratedInteraction(W_rep)),
+            (IntegratedInteraction(W_rep), SampledInteraction(Wprime_attr))),
+           (mobρ, mobσ),
+           (Diffusion(1), nothing));
+
+julia> x = ArrayPartition(gaussian_particles(2, 4), collect(range(-3, 4, length=5)))
+([-2.000000000000003, -0.30305473018369145, 0.30305473018369145, 2.000000000000003], [-3.0, -1.25, 0.5, 2.25, 4.0])
+
+julia> abstract_velocities(x, model, 0.)
+([5.678607254140728, -1.2999841925528028, 1.1787288917721954, -5.971262339527799], [22.921033907881895, 0.8199108735979148, 0.7055593913708742, -8.681409489341364, -54.89301971628215])
+```
+"""
 struct ParabolicModel{
     N,
     TVs <: NTuple{N,Any},
