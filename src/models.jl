@@ -1,4 +1,4 @@
-export AbstractModel, SampledModel, IntegratedModel, DiffusiveSampledModel, DiffusiveIntegratedModel, HyperbolicModel
+export AbstractModel, SampledModel, IntegratedModel, DiffusiveSampledModel, DiffusiveIntegratedModel, HyperbolicModel, ParabolicModel
 export num_species, external_velocity, interaction, mobility, diffusion, eachspecies, species
 
 
@@ -224,15 +224,34 @@ struct HyperbolicModel{
     mobs::TMs
 end
 
+struct ParabolicModel{
+    N,
+    TVs <: NTuple{N,Any},
+    TIs <: NTuple{N,NTuple{N,Any}},
+    TMs <: NTuple{N,Any},
+    TDs <: NTuple{N,Any}
+} <: AbstractModel
+    vels::TVs
+    ints::TIs
+    mobs::TMs
+    difs::TDs
+end
+
 
 num_species(mod::HyperbolicModel{N}) where N = N
+num_species(mod::ParabolicModel{N}) where N = N
 
 num_species(mod::Type{<:HyperbolicModel{N}}) where N = N
+num_species(mod::Type{<:ParabolicModel{N}}) where N = N
 
 external_velocity(mod::HyperbolicModel, i::Integer) = mod.vels[i]
+external_velocity(mod::ParabolicModel, i::Integer) = mod.vels[i]
 
 interaction(mod::HyperbolicModel, i::Integer, j::Integer) = mod.ints[i][j]
+interaction(mod::ParabolicModel, i::Integer, j::Integer) = mod.ints[i][j]
 
 mobility(mod::HyperbolicModel, i::Integer) = mod.mobs[i]
+mobility(mod::ParabolicModel, i::Integer) = mod.mobs[i]
 
 diffusion(mod::HyperbolicModel, i::Integer) = nothing
+diffusion(mod::ParabolicModel, i::Integer) = mod.difs[i]

@@ -257,7 +257,7 @@ function apply_interaction!(dx, x, p::Union{IntegratedModel,DiffusiveIntegratedM
     end
 end
 
-function apply_interaction!(dx, x, p::HyperbolicModel, t, s::Integer, o::Integer, dens_diff)
+function apply_interaction!(dx, x, p::Union{HyperbolicModel,ParabolicModel}, t, s::Integer, o::Integer, dens_diff)
     xs = species(x, s)
     dxs = species(dx, s)
     for i in eachindex(xs)
