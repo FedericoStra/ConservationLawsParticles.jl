@@ -257,6 +257,14 @@ function apply_interaction!(dx, x, p::Union{IntegratedModel,DiffusiveIntegratedM
     end
 end
 
+function apply_interaction!(dx, x, p::HyperbolicModel, t, s::Integer, o::Integer, dens_diff)
+    xs = species(x, s)
+    dxs = species(dx, s)
+    for i in eachindex(xs)
+        dxs[i] += compute_interaction(t, xs[i], interaction(p, s, o), species(x, o), dens_diff)
+    end
+end
+
 function apply_diffusion!(dx, x, p::AbstractModel, t, s::Integer, dens)
     diffuse!(species(dx, s), species(x, s), dens, diffusion(p, s))
 end
@@ -279,6 +287,39 @@ function abstract_velocities!(
     dx::ArrayPartition{F, T},
     x::ArrayPartition{F, T},
     p::AbstractModel,
+    t
+) where {
+    F,
+    T <: Tuple{Vararg{AbstractVector{<:Real}}},
+}
+    dens = pwc_densities(x.x...)
+    dens_diff = similar(x)
+    for s in eachspecies(p)
+        dens_diff.x[s] .= dens[s][s, 2, :] .- dens[s][s, 1, :]
+    end
+    for s in eachspecies(p)
+        xs = species(x, s)
+        dxs = species(dx, s)
+        apply_velocity!(dx, x, p, t, s)
+        apply_all_interactions!(dx, x, p, t, s, dens_diff)
+        d = dens[s]
+        mob = mobility(p, s)
+        for i in eachindex(dxs)
+            if dxs[i] < 0
+                m = mob(d[:, 1, i]...)
+            else
+                m = mob(d[:, 2, i]...)
+            end
+            dxs[i] *= m
+        end
+        apply_diffusion!(dx, x, p, t, s, pwc_density(xs))
+    end
+end
+
+function abstract_velocities!(
+    dx::ArrayPartition{F, T},
+    x::ArrayPartition{F, T},
+    p::HyperbolicModel,
     t
 ) where {
     F,
