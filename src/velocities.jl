@@ -166,8 +166,10 @@ end
     make_velocity(V::Function, Wprime::Function, mobility::Function)
 
 Creates a function `velocity(dx, x, p, t)` that computes the velocity of the particles
-under the influence of an external force `V`, a mutual interaction `Wprime` and the
+under the influence of an external velocity `V`, a mutual interaction `Wprime` and the
 congestion given by `mobility`.
+
+See also [`make_velocities`](@ref).
 """
 function make_velocity(V::Function, Wprime::Function, mobility::Function)
     function velocity(dx, x, p, t)
@@ -194,6 +196,15 @@ function make_velocity(V::Function, Wprime::Function, mobility::Function)
     velocity
 end
 
+"""
+    make_velocities((V₁, ...), ((W′₁₁, ...), ...), (mob₁, ...))
+
+Creates a function `velocities(dx, x, p, t)` that computes the velocity of the particles
+under the influence of the external velocities `Vᵢ`, mutual interactions `W′ᵢⱼ` and
+congestions given by `mobᵢ`.
+
+See also [`make_velocity`](@ref).
+"""
 function make_velocities(
         Vs::Tuple{Vararg{Any,N}},
         Wprimes::Tuple{Vararg{Tuple{Vararg{Any,N}},N}},
