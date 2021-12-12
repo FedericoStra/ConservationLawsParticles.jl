@@ -1,3 +1,6 @@
+export PiecewiseConstantFunction
+export plot_pcf, plot_pcf!
+
 struct PiecewiseConstantFunction{X,Y}
     cuts::Vector{X}
     values::Vector{Y}
@@ -56,6 +59,7 @@ for op in [:+, :-, :*, :/, :^]
     end
     push!(values, $op(f.values[i], g.values[j]))
     PiecewiseConstantFunction(cuts, values)
+end
 end
 
 function plot_pcf(f::PiecewiseConstantFunction; kwargs...)
