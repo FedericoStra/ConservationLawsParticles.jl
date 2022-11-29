@@ -16,19 +16,19 @@ See also [`integrated_interaction`](@ref), [`compute_interaction`](@ref).
 function sampled_interaction end
 
 function sampled_interaction(x::Real, Wprime, ys::AbstractVector{<:Real})
-    -sum(Wprime(x - y) for y in ys) / (length(ys) - 1)
+    -sum(y -> Wprime(x - y), ys) / (length(ys) - 1)
 end
 
 function sampled_interaction(t::Real, x::Real, Wprime, ys::AbstractVector{<:Real})
-    -sum(Wprime(t, x - y) for y in ys) / (length(ys) - 1)
+    -sum(y -> Wprime(t, x - y), ys) / (length(ys) - 1)
 end
 
 function sampled_interaction(x::Real; Wprime, particles::AbstractVector{<:Real})
-    -sum(Wprime(x - p) for p in particles) / (length(particles) - 1)
+    -sum(p -> Wprime(x - p), particles) / (length(particles) - 1)
 end
 
 function sampled_interaction(t::Real, x::Real; Wprime, particles::AbstractVector{<:Real})
-    -sum(Wprime(t, x - p) for p in particles) / (length(particles) - 1)
+    -sum(p -> Wprime(t, x - p), particles) / (length(particles) - 1)
 end
 
 
@@ -50,11 +50,15 @@ See also [`sampled_interaction`](@ref), [`compute_interaction`](@ref).
 function integrated_interaction end
 
 function integrated_interaction(x::Real, W, ys::AbstractVector{<:Real}, dens_diff::AbstractVector{<:Real}=diff(pwc_density(ys)))
-    -sum(i -> dens_diff[i] * W(x - ys[i]), eachindex(ys))
+    # eachindex(dens_diff) == eachindex(ys) || throw(DimensionMismatch("`ys` and `dens_diff` must have the same indices"))
+    # -sum(i -> (@inbounds W(x - ys[i]) * dens_diff[i]), eachindex(ys, dens_diff))
+    -sum(p -> W(x - p[1]) * p[2], zip(ys, dens_diff))
 end
 
 function integrated_interaction(t::Real, x::Real, W, ys::AbstractVector{<:Real}, dens_diff::AbstractVector{<:Real}=diff(pwc_density(ys)))
-    -sum(i -> dens_diff[i] * W(t, x - ys[i]), eachindex(ys))
+    # eachindex(dens_diff) == eachindex(ys) || throw(DimensionMismatch("`ys` and `dens_diff` must have the same indices"))
+    # -sum(i -> (@inbounds W(t, x - ys[i]) * dens_diff[i]), eachindex(ys, dens_diff))
+    -sum(p -> W(t, x - p[1]) * p[2], zip(ys, dens_diff))
 end
 
 
