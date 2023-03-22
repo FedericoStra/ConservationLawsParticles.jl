@@ -11,8 +11,8 @@ Base.broadcast(f, pcf::PiecewiseConstantFunction) = PiecewiseConstantFunction(pc
 Base.map(f, pcf::PiecewiseConstantFunction) = PiecewiseConstantFunction(pcf.cuts, map(f, pcf.values))
 
 function Base.broadcast(op, f::PiecewiseConstantFunction, g::PiecewiseConstantFunction)
-    cuts = []
-    values = []
+    cuts = promote_type(eltype(f.cuts), eltype(g.cuts))[]
+    values = promote_type(eltype(f.values), eltype(g.values))[]
     i, j = 1, 1
     len_f, len_g = length(f.cuts), length(g.cuts)
     while i <= len_f || j <= len_g
@@ -37,8 +37,8 @@ end
 
 for op in [:+, :-, :*, :/, :^]
 @eval function Base.$op(f::PiecewiseConstantFunction, g::PiecewiseConstantFunction)
-    cuts = []
-    values = []
+    cuts = promote_type(eltype(f.cuts), eltype(g.cuts))[]
+    values = promote_type(eltype(f.values), eltype(g.values))[]
     i, j = 1, 1
     len_f, len_g = length(f.cuts), length(g.cuts)
     while i <= len_f || j <= len_g
