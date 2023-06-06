@@ -1,7 +1,11 @@
 export densityplot, densityplot!
 export plot_density, plot_density!, plot_linear_density!
 
+export pcfplot, pcfplot!
+export plot_pcf, plot_pcf!
+
 using RecipesBase
+
 
 @userplot DensityPlot
 
@@ -27,3 +31,18 @@ function plot_linear_density!(p, x; kwargs...)
     Y = pwc_density(x)[2:end-1]
     plot!(p, X, Y; kwargs...)
 end
+
+
+@userplot PcfPlot
+
+@recipe function _(pcfp::PcfPlot)
+    [(
+        X = repeat(f.cuts, inner=2);
+        Y = repeat(f.values, inner=2)[2:end-1];
+        X[1] = f.cuts[1];
+        (X, Y)
+    ) for f in pcfp.args]
+end
+
+plot_pcf(args...; kwargs...) = pcfplot(args...; kwargs...)
+plot_pcf!(args...; kwargs...) = pcfplot!(args...; kwargs...)
