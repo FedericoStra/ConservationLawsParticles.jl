@@ -8,7 +8,7 @@ $(TYPEDEF)
 
 Abstract type representing a particle model.
 """
-abstract type AbstractModel{N} end
+abstract type AbstractModel{S} end
 
 
 """
@@ -94,11 +94,11 @@ julia> velocities(x, model, 0.)
 ```
 """
 struct SampledModel{
-    N,
-    TVs         <: Tuple{Vararg{Any,N}},
-    TWprimes    <: Tuple{Vararg{Tuple{Vararg{Any,N}},N}},
-    Tmobilities <: Tuple{Vararg{Any,N}},
-} <: AbstractModel{N}
+    S,
+    TVs         <: Tuple{Vararg{Any,S}},
+    TWprimes    <: Tuple{Vararg{Tuple{Vararg{Any,S}},S}},
+    Tmobilities <: Tuple{Vararg{Any,S}},
+} <: AbstractModel{S}
     Vs::TVs
     Wprimes::TWprimes
     mobilities::Tmobilities
@@ -137,11 +137,11 @@ julia> velocities(x, model, 0.)
 ```
 """
 struct IntegratedModel{
-    N,
-    TVs         <: Tuple{Vararg{Any,N}},
-    TWs         <: Tuple{Vararg{Tuple{Vararg{Any,N}},N}},
-    Tmobilities <: Tuple{Vararg{Any,N}},
-} <: AbstractModel{N}
+    S,
+    TVs         <: Tuple{Vararg{Any,S}},
+    TWs         <: Tuple{Vararg{Tuple{Vararg{Any,S}},S}},
+    Tmobilities <: Tuple{Vararg{Any,S}},
+} <: AbstractModel{S}
     Vs::TVs
     Ws::TWs
     mobilities::Tmobilities
@@ -150,11 +150,11 @@ end
 IntegratedModel(V, W, mob) = IntegratedModel((V,), ((W,),), (mob,))
 
 
-num_species(mod::SampledModel{N}) where N = N
-num_species(mod::IntegratedModel{N}) where N = N
+num_species(mod::SampledModel{S}) where S = S
+num_species(mod::IntegratedModel{S}) where S = S
 
-num_species(mod::Type{<:SampledModel{N}}) where N = N
-num_species(mod::Type{<:IntegratedModel{N}}) where N = N
+num_species(mod::Type{<:SampledModel{S}}) where S = S
+num_species(mod::Type{<:IntegratedModel{S}}) where S = S
 
 external_velocity(mod::SampledModel, i::Integer) = mod.Vs[i]
 external_velocity(mod::IntegratedModel, i::Integer) = mod.Vs[i]
@@ -201,12 +201,12 @@ julia> velocities_diff(x, model, 0.)
 ```
 """
 struct DiffusiveSampledModel{
-    N,
-    TVs         <: Tuple{Vararg{Any,N}},
-    TWprimes    <: Tuple{Vararg{Tuple{Vararg{Any,N}},N}},
-    Tmobilities <: Tuple{Vararg{Any,N}},
-    Tdiffusions <: Tuple{Vararg{Any,N}}
-} <: AbstractModel{N}
+    S,
+    TVs         <: Tuple{Vararg{Any,S}},
+    TWprimes    <: Tuple{Vararg{Tuple{Vararg{Any,S}},S}},
+    Tmobilities <: Tuple{Vararg{Any,S}},
+    Tdiffusions <: Tuple{Vararg{Any,S}}
+} <: AbstractModel{S}
     Vs::TVs
     Wprimes::TWprimes
     mobilities::Tmobilities
@@ -245,12 +245,12 @@ julia> velocities_diff(x, model, 0.)
 ```
 """
 struct DiffusiveIntegratedModel{
-    N,
-    TVs         <: Tuple{Vararg{Any,N}},
-    TWs         <: Tuple{Vararg{Tuple{Vararg{Any,N}},N}},
-    Tmobilities <: Tuple{Vararg{Any,N}},
-    Tdiffusions <: Tuple{Vararg{Any,N}}
-} <: AbstractModel{N}
+    S,
+    TVs         <: Tuple{Vararg{Any,S}},
+    TWs         <: Tuple{Vararg{Tuple{Vararg{Any,S}},S}},
+    Tmobilities <: Tuple{Vararg{Any,S}},
+    Tdiffusions <: Tuple{Vararg{Any,S}}
+} <: AbstractModel{S}
     Vs::TVs
     Ws::TWs
     mobilities::Tmobilities
@@ -258,11 +258,11 @@ struct DiffusiveIntegratedModel{
 end
 
 
-num_species(mod::DiffusiveSampledModel{N}) where N = N
-num_species(mod::DiffusiveIntegratedModel{N}) where N = N
+num_species(mod::DiffusiveSampledModel{S}) where S = S
+num_species(mod::DiffusiveIntegratedModel{S}) where S = S
 
-num_species(mod::Type{<:DiffusiveSampledModel{N}}) where N = N
-num_species(mod::Type{<:DiffusiveIntegratedModel{N}}) where N = N
+num_species(mod::Type{<:DiffusiveSampledModel{S}}) where S = S
+num_species(mod::Type{<:DiffusiveIntegratedModel{S}}) where S = S
 
 external_velocity(mod::DiffusiveSampledModel, i::Integer) = mod.Vs[i]
 external_velocity(mod::DiffusiveIntegratedModel, i::Integer) = mod.Vs[i]
@@ -307,11 +307,11 @@ julia> abstract_velocities(x, model, 0.)
 ```
 """
 struct HyperbolicModel{
-    N,
-    TVs <: NTuple{N,Any},
-    TIs <: NTuple{N,NTuple{N,Any}},
-    TMs <: NTuple{N,Any}
-} <: AbstractModel{N}
+    S,
+    TVs <: NTuple{S,Any},
+    TIs <: NTuple{S,NTuple{S,Any}},
+    TMs <: NTuple{S,Any}
+} <: AbstractModel{S}
     vels::TVs
     ints::TIs
     mobs::TMs
@@ -350,12 +350,12 @@ julia> abstract_velocities(x, model, 0.)
 ```
 """
 struct ParabolicModel{
-    N,
-    TVs <: NTuple{N,Any},
-    TIs <: NTuple{N,NTuple{N,Any}},
-    TMs <: NTuple{N,Any},
-    TDs <: NTuple{N,Any}
-} <: AbstractModel{N}
+    S,
+    TVs <: NTuple{S,Any},
+    TIs <: NTuple{S,NTuple{S,Any}},
+    TMs <: NTuple{S,Any},
+    TDs <: NTuple{S,Any}
+} <: AbstractModel{S}
     vels::TVs
     ints::TIs
     mobs::TMs
@@ -363,11 +363,11 @@ struct ParabolicModel{
 end
 
 
-num_species(mod::HyperbolicModel{N}) where N = N
-num_species(mod::ParabolicModel{N}) where N = N
+num_species(mod::HyperbolicModel{S}) where S = S
+num_species(mod::ParabolicModel{S}) where S = S
 
-num_species(mod::Type{<:HyperbolicModel{N}}) where N = N
-num_species(mod::Type{<:ParabolicModel{N}}) where N = N
+num_species(mod::Type{<:HyperbolicModel{S}}) where S = S
+num_species(mod::Type{<:ParabolicModel{S}}) where S = S
 
 external_velocity(mod::HyperbolicModel, i::Integer) = mod.vels[i]
 external_velocity(mod::ParabolicModel, i::Integer) = mod.vels[i]

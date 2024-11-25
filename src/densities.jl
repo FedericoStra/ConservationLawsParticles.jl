@@ -7,7 +7,7 @@ Returns the piecewise constant probability density from the quantile particle po
 
 Let the quantile particles be at positions `x₀, x₁, …, xₙ` (remember that in Julia
 they are actually `x[1], x[2], ..., x[n], x[n+1]`).
-The returned array `R` is such that `R[1] = R[n+2] = 0` and `R[i] = 1 / (N * (x[i] - x[i-1]))`
+The returned array `R` is such that `R[1] = R[n+2] = 0` and `R[i] = 1 / (n * (x[i] - x[i-1]))`
 for the intermediate indices (this formula holds also for the first and last entry
 if we assume `x[0] = -∞` and `x[n+2] = ∞`).
 
@@ -134,10 +134,10 @@ function pwc_densities end
 pwc_densities(xs::AbstractVector{<:Real}...) = pwc_densities(xs)
 
 function pwc_densities(xs::Tuple{Vararg{AbstractVector{<:Real}}})
-    N = nfields(xs)
+    S = nfields(xs)
     T = promote_type(float.(eltype.(xs))...)
     len = length.(xs)
-    dens = map(x -> new_undef_densities(T, N, length(x)), xs)::NTuple{N, Array{T, 3}}
+    dens = map(x -> new_undef_densities(T, S, length(x)), xs)::NTuple{S, Array{T, 3}}
     pwc_densities!(dens, xs)
 end
 
@@ -155,20 +155,20 @@ function pwc_densities! end
 pwc_densities!(dens, xs::AbstractVector{<:Real}...) = pwc_densities!(dens, xs)
 
 function pwc_densities!(dens, xs::Tuple{Vararg{AbstractVector{<:Real}}})
-    N = nfields(xs)
+    S = nfields(xs)
     T = promote_type(float.(eltype.(xs))...)
     len = length.(xs)
     # indices of current particles being examined
-    ind = ones(Int, N)
+    ind = ones(Int, S)
     # current densities
-    ds = zeros(T, N)
+    ds = zeros(T, S)
     # normalization factors
-    fs::NTuple{N, T} = 1 ./ (len .- 1)
+    fs::NTuple{S, T} = 1 ./ (len .- 1)
     # @debug "Entering loop" T len ds fs
     i_min = Int[0]
     @inbounds while true
         n_mins::Int = 0
-        for i in 1:N
+        for i in 1:S
             if ind[i] <= len[i]
                 if n_mins == 0 || xs[i][ind[i]] < xs[i_min[1]][ind[i_min[1]]]
                     i_min[1] = i
@@ -193,7 +193,7 @@ function pwc_densities!(dens, xs::Tuple{Vararg{AbstractVector{<:Real}}})
         for i in i_mins
             # @debug "Assigning left" i ind[i] ds
             # dens[i][:, 1, ind[i]] = ds
-            for s in 1:N
+            for s in 1:S
                 dens[i][s, 1, ind[i]] = ds[s]
             end
         end
@@ -208,7 +208,7 @@ function pwc_densities!(dens, xs::Tuple{Vararg{AbstractVector{<:Real}}})
         for i in i_mins
             # @debug "Assigning right" i ind[i] ds
             # dens[i][:, 2, ind[i]] = ds
-            for s in 1:N
+            for s in 1:S
                 dens[i][s, 2, ind[i]] = ds[s]
             end
         end
@@ -220,4 +220,4 @@ function pwc_densities!(dens, xs::Tuple{Vararg{AbstractVector{<:Real}}})
     dens
 end
 
-new_undef_densities(T::Type, N::Int, len::Int) = Array{T, 3}(undef, (N, 2, len))
+new_undef_densities(T::Type, S::Int, len::Int) = Array{T, 3}(undef, (S, 2, len))

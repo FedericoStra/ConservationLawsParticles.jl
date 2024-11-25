@@ -18,20 +18,20 @@ end
 function velocities!(
     dx::ArrayPartition{F, T},
     x::ArrayPartition{F, T},
-    p::SampledModel{N, TVs, TWprimes, Tmobilities},
+    p::SampledModel{S, TVs, TWprimes, Tmobilities},
     t
 ) where {
     F,
     T <: Tuple{Vararg{AbstractVector{<:Real}}},
-    N, TVs, TWprimes, Tmobilities
+    S, TVs, TWprimes, Tmobilities
 }
     dens = pwc_densities(x.x)
-    for spec in 1:N
+    for spec in 1:S
         dx.x[spec] .= p.Vs[spec].(t, x.x[spec])
-        for other in 1:N, i in eachindex(x.x[spec])
+        for other in 1:S, i in eachindex(x.x[spec])
             dx.x[spec][i] += sampled_interaction(t, x.x[spec][i], p.Wprimes[spec][other], x.x[other])
         end
-        # for other in 1:N
+        # for other in 1:S
         #     dx.x[spec] .+= sampled_interaction.(t, x.x[spec]; Wprime=p.Wprimes[spec][other], particles=x.x[other])
         # end
         d = dens[spec]
@@ -49,21 +49,21 @@ end
 function velocities!(
     dx::ArrayPartition{F, T},
     x::ArrayPartition{F, T},
-    p::IntegratedModel{N, TVs, TWs, Tmobilities},
+    p::IntegratedModel{S, TVs, TWs, Tmobilities},
     t
 ) where {
     F,
     T <: Tuple{Vararg{AbstractVector{<:Real}}},
-    N, TVs, TWs, Tmobilities
+    S, TVs, TWs, Tmobilities
 }
     dens = pwc_densities(x.x)
     dens_diff = similar(x)
-    for s in 1:N
+    for s in 1:S
         dens_diff.x[s] .= dens[s][s, 2, :] .- dens[s][s, 1, :]
     end
-    for spec in 1:N
+    for spec in 1:S
         dx.x[spec] .= p.Vs[spec].(t, x.x[spec])
-        for other in 1:N, i in eachindex(x.x[spec])
+        for other in 1:S, i in eachindex(x.x[spec])
             dx.x[spec][i] += integrated_interaction(t, x.x[spec][i], p.Ws[spec][other], x.x[other], dens_diff.x[other])
         end
         d = dens[spec]
@@ -95,12 +95,12 @@ end
 @generated function velocities_gen!(
     dx::ArrayPartition{F, T},
     x::ArrayPartition{F, T},
-    p::SampledModel{N, TVs, TWprimes, Tmobilities},
+    p::SampledModel{S, TVs, TWprimes, Tmobilities},
     t
 ) where {
     F,
     T <: Tuple{Vararg{AbstractVector{<:Real}}},
-    N, TVs, TWprimes, Tmobilities
+    S, TVs, TWprimes, Tmobilities
 }
 quote
     dens = pwc_densities(x.x)
@@ -110,54 +110,54 @@ quote
             for i in eachindex(x.x[$spec])
                 dx.x[$spec][i] += sampled_interaction(t, x.x[$spec][i], p.Wprimes[$spec][$other], x.x[$other])
             end
-        end for other in 1:N)...)
+        end for other in 1:S)...)
         d = dens[$spec]
         for i in eachindex(dx.x[$spec])
             if dx.x[$spec][i] < 0
-                mob = p.mobilities[$spec]($((:(d[$j, 1, i]) for j in 1:N)...))
+                mob = p.mobilities[$spec]($((:(d[$j, 1, i]) for j in 1:S)...))
             else
-                mob = p.mobilities[$spec]($((:(d[$j, 2, i]) for j in 1:N)...))
+                mob = p.mobilities[$spec]($((:(d[$j, 2, i]) for j in 1:S)...))
             end
             dx.x[$spec][i] *= mob
         end
-    end for spec in 1:N)...)
+    end for spec in 1:S)...)
 end
 end
 
 @generated function velocities_gen!(
     dx::ArrayPartition{F, T},
     x::ArrayPartition{F, T},
-    p::IntegratedModel{N, TVs, TWs, Tmobilities},
+    p::IntegratedModel{S, TVs, TWs, Tmobilities},
     t
 ) where {
     F,
     T <: Tuple{Vararg{AbstractVector{<:Real}}},
-    N, TVs, TWs, Tmobilities
+    S, TVs, TWs, Tmobilities
 }
 quote
     dens = pwc_densities(x.x)
     dens_diff = similar(x)
-    for s in 1:N
+    for s in 1:S
         dens_diff.x[s] .= dens[s][s, 2, :] .- dens[s][s, 1, :]
     end
-    # $((:(dens_diff.x[$s] .= dens[$s][$s, 1, :] .- dens[$s][$s, 2, :]) for s in 1:N)...)
+    # $((:(dens_diff.x[$s] .= dens[$s][$s, 1, :] .- dens[$s][$s, 2, :]) for s in 1:S)...)
     $((quote
         dx.x[$spec] .= p.Vs[$spec].(t, x.x[$spec])
         $((quote
             for i in eachindex(x.x[$spec])
                 dx.x[$spec][i] += integrated_interaction(t, x.x[$spec][i], p.Ws[$spec][$other], x.x[$other], dens_diff.x[$other])
             end
-        end for other in 1:N)...)
+        end for other in 1:S)...)
         d = dens[$spec]
         for i in eachindex(dx.x[$spec])
             if dx.x[$spec][i] < 0
-                mob = p.mobilities[$spec]($((:(d[$j, 1, i]) for j in 1:N)...))
+                mob = p.mobilities[$spec]($((:(d[$j, 1, i]) for j in 1:S)...))
             else
-                mob = p.mobilities[$spec]($((:(d[$j, 2, i]) for j in 1:N)...))
+                mob = p.mobilities[$spec]($((:(d[$j, 2, i]) for j in 1:S)...))
             end
             dx.x[$spec][i] *= mob
         end
-    end for spec in 1:N)...)
+    end for spec in 1:S)...)
 end
 end
 
@@ -206,10 +206,10 @@ congestions given by `mobᵢ`.
 See also [`make_velocity`](@ref).
 """
 function make_velocities(
-        Vs::Tuple{Vararg{Any,N}},
-        Wprimes::Tuple{Vararg{Tuple{Vararg{Any,N}},N}},
-        mobilities::Tuple{Vararg{Any,N}}
-        ) where N
+        Vs::Tuple{Vararg{Any,S}},
+        Wprimes::Tuple{Vararg{Tuple{Vararg{Any,S}},S}},
+        mobilities::Tuple{Vararg{Any,S}}
+        ) where S
     function velocities(
             dx::ArrayPartition{F, T},
             x::ArrayPartition{F, T},
@@ -217,10 +217,10 @@ function make_velocities(
             t
             ) where F where T<:Tuple{Vararg{AbstractVector{<:Real}}}
         dens = pwc_densities(x.x)
-        for spec in 1:N
+        for spec in 1:S
             for i in 1:length(x.x[spec])
                 v::F = Vs[spec](t, x.x[spec][i])
-                for other in 1:N
+                for other in 1:S
                     v += sampled_interaction(t, x.x[spec][i], Wprimes[spec][other], x.x[other])
                 end
                 if v < 0
@@ -430,17 +430,17 @@ end
 function velocities_diff!(
     dx::ArrayPartition{F, T},
     x::ArrayPartition{F, T},
-    p::DiffusiveSampledModel{N, TVs, TWprimes, Tmobilities, Tdiffusions},
+    p::DiffusiveSampledModel{S, TVs, TWprimes, Tmobilities, Tdiffusions},
     t
 ) where {
     F,
     T <: Tuple{Vararg{AbstractVector{<:Real}}},
-    N, TVs, TWprimes, Tmobilities, Tdiffusions
+    S, TVs, TWprimes, Tmobilities, Tdiffusions
 }
     dens = pwc_densities(x.x)
-    for spec in 1:N
+    for spec in 1:S
         dx.x[spec] .= p.Vs[spec].(t, x.x[spec])
-        for other in 1:N, i in eachindex(x.x[spec])
+        for other in 1:S, i in eachindex(x.x[spec])
             dx.x[spec][i] += sampled_interaction(t, x.x[spec][i], p.Wprimes[spec][other], x.x[other])
         end
         d = dens[spec]
@@ -459,21 +459,21 @@ end
 function velocities_diff!(
     dx::ArrayPartition{F, T},
     x::ArrayPartition{F, T},
-    p::DiffusiveIntegratedModel{N, TVs, TWs, Tmobilities, Tdiffusions},
+    p::DiffusiveIntegratedModel{S, TVs, TWs, Tmobilities, Tdiffusions},
     t
 ) where {
     F,
     T <: Tuple{Vararg{AbstractVector{<:Real}}},
-    N, TVs, TWs, Tmobilities, Tdiffusions
+    S, TVs, TWs, Tmobilities, Tdiffusions
 }
     dens = pwc_densities(x.x)
     dens_diff = similar(x)
-    for s in 1:N
+    for s in 1:S
         dens_diff.x[s] .= dens[s][s, 2, :] .- dens[s][s, 1, :]
     end
-    for spec in 1:N
+    for spec in 1:S
         dx.x[spec] .= p.Vs[spec].(t, x.x[spec])
-        for other in 1:N, i in eachindex(x.x[spec])
+        for other in 1:S, i in eachindex(x.x[spec])
             dx.x[spec][i] += integrated_interaction(t, x.x[spec][i], p.Ws[spec][other], x.x[other], dens_diff.x[other])
         end
         d = dens[spec]
