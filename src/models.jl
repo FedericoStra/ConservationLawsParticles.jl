@@ -86,11 +86,13 @@ julia> model = SampledModel(
             (Wprime_rep, Wprime_attr)),
            (mobρ, mobσ));
 
-julia> x = ArrayPartition(gaussian_particles(2, 4), collect(range(-3, 4, length=5)))
-([-2.000000000000003, -0.30305473018369145, 0.30305473018369145, 2.000000000000003], [-3.0, -1.25, 0.5, 2.25, 4.0])
+julia> x = ArrayPartition(gaussian_particles(2, 4), collect(range(-3, 4, length=5)));
 
-julia> velocities(x, model, 0.)
-([6.291136247066298, 0.2466663161150116, -0.7218917091339228, -7.22630670503873], [22.405129478914613, 1.1249366684885518, 1.5188519354999799, -7.87111869358889, -54.536397957423915])
+julia> round.(x; digits=2)
+([-2.0, -0.3, 0.3, 2.0], [-3.0, -1.25, 0.5, 2.25, 4.0])
+
+julia> velocities(x, model, 0.) .|> v -> round(v; digits=2)
+([6.29, 0.25, -0.72, -7.23], [22.41, 1.12, 1.52, -7.87, -54.54])
 ```
 """
 struct SampledModel{
@@ -129,11 +131,13 @@ julia> model = IntegratedModel(
             (W_rep, W_attr)),
            (mobρ, mobσ));
 
-julia> x = ArrayPartition(gaussian_particles(2, 4), collect(range(-3, 4, length=5)))
-([-2.000000000000003, -0.30305473018369145, 0.30305473018369145, 2.000000000000003], [-3.0, -1.25, 0.5, 2.25, 4.0])
+julia> x = ArrayPartition(gaussian_particles(2, 4), collect(range(-3, 4, length=5)));
 
-julia> velocities(x, model, 0.)
-([6.621647425385332, 0.30545649966452776, -0.42671180044513507, -6.914302510772401], [23.261098611816987, 0.9023583690557855, 0.7055593913708742, -8.774526834146023, -55.23308442021724])
+julia> round.(x; digits=2)
+([-2.0, -0.3, 0.3, 2.0], [-3.0, -1.25, 0.5, 2.25, 4.0])
+
+julia> velocities(x, model, 0.) .|> v -> round(v; digits=2)
+([6.62, 0.31, -0.43, -6.91], [23.26, 0.9, 0.71, -8.77, -55.23])
 ```
 """
 struct IntegratedModel{
@@ -193,11 +197,13 @@ julia> model = DiffusiveSampledModel(
            (mobρ, mobσ),
            (Diffusion(1), nothing));
 
-julia> x = ArrayPartition(gaussian_particles(2, 4), collect(range(-3, 4, length=5)))
-([-2.000000000000003, -0.30305473018369145, 0.30305473018369145, 2.000000000000003], [-3.0, -1.25, 0.5, 2.25, 4.0])
+julia> x = ArrayPartition(gaussian_particles(2, 4), collect(range(-3, 4, length=5)));
 
-julia> velocities_diff(x, model, 0.)
-([5.701842050142524, -0.8139064918316994, 0.3386810988127882, -6.637012508114956], [22.405129478914613, 1.1249366684885518, 1.5188519354999799, -7.87111869358889, -54.536397957423915])
+julia> round.(x; digits=2)
+([-2.0, -0.3, 0.3, 2.0], [-3.0, -1.25, 0.5, 2.25, 4.0])
+
+julia> velocities_diff(x, model, 0.) .|> v -> round(v; digits=2)
+([5.7, -0.81, 0.34, -6.64], [22.41, 1.12, 1.52, -7.87, -54.54])
 ```
 """
 struct DiffusiveSampledModel{
@@ -237,11 +243,13 @@ julia> model = DiffusiveIntegratedModel(
            (mobρ, mobσ),
            (Diffusion(1), nothing));
 
-julia> x = ArrayPartition(gaussian_particles(2, 4), collect(range(-3, 4, length=5)))
-([-2.000000000000003, -0.30305473018369145, 0.30305473018369145, 2.000000000000003], [-3.0, -1.25, 0.5, 2.25, 4.0])
+julia> x = ArrayPartition(gaussian_particles(2, 4), collect(range(-3, 4, length=5)));
 
-julia> velocities_diff(x, model, 0.)
-([6.032353228461558, -0.7551163082821832, 0.6338610075015758, -6.3250083138486275], [23.261098611816987, 0.9023583690557855, 0.7055593913708742, -8.774526834146023, -55.23308442021724])
+julia> round.(x; digits=2)
+([-2.0, -0.3, 0.3, 2.0], [-3.0, -1.25, 0.5, 2.25, 4.0])
+
+julia> velocities_diff(x, model, 0.) .|> v -> round(v; digits=2)
+([6.03, -0.76, 0.63, -6.33], [23.26, 0.9, 0.71, -8.77, -55.23])
 ```
 """
 struct DiffusiveIntegratedModel{
@@ -299,11 +307,13 @@ julia> model = HyperbolicModel(
             (IntegratedInteraction(W_rep), SampledInteraction(Wprime_attr))),
            (mobρ, mobσ));
 
-julia> x = ArrayPartition(gaussian_particles(2, 4), collect(range(-3, 4, length=5)))
-([-2.000000000000003, -0.30305473018369145, 0.30305473018369145, 2.000000000000003], [-3.0, -1.25, 0.5, 2.25, 4.0])
+julia> x = ArrayPartition(gaussian_particles(2, 4), collect(range(-3, 4, length=5)));
 
-julia> abstract_velocities(x, model, 0.)
-([6.267901451064502, 0.2629261335925302, -0.3841814343731375, -6.560556536451573], [22.921033907881895, 0.8199108735979148, 0.7055593913708742, -8.681409489341364, -54.89301971628215])
+julia> round.(x; digits=2)
+([-2.0, -0.3, 0.3, 2.0], [-3.0, -1.25, 0.5, 2.25, 4.0])
+
+julia> abstract_velocities(x, model, 0.) .|> v -> round(v; digits=2)
+([6.27, 0.26, -0.38, -6.56], [22.92, 0.82, 0.71, -8.68, -54.89])
 ```
 """
 struct HyperbolicModel{
@@ -342,11 +352,13 @@ julia> model = ParabolicModel(
            (mobρ, mobσ),
            (Diffusion(1), nothing));
 
-julia> x = ArrayPartition(gaussian_particles(2, 4), collect(range(-3, 4, length=5)))
-([-2.000000000000003, -0.30305473018369145, 0.30305473018369145, 2.000000000000003], [-3.0, -1.25, 0.5, 2.25, 4.0])
+julia> x = ArrayPartition(gaussian_particles(2, 4), collect(range(-3, 4, length=5)));
 
-julia> abstract_velocities(x, model, 0.)
-([5.678607254140728, -0.7976466743541808, 0.6763913735735734, -5.971262339527799], [22.921033907881895, 0.8199108735979148, 0.7055593913708742, -8.681409489341364, -54.89301971628215])
+julia> round.(x; digits=2)
+([-2.0, -0.3, 0.3, 2.0], [-3.0, -1.25, 0.5, 2.25, 4.0])
+
+julia> abstract_velocities(x, model, 0.) .|> v -> round(v; digits=2)
+([5.68, -0.8, 0.68, -5.97], [22.92, 0.82, 0.71, -8.68, -54.89])
 ```
 """
 struct ParabolicModel{
