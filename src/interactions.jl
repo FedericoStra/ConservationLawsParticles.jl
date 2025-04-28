@@ -49,7 +49,7 @@ See also [`sampled_interaction`](@ref), [`compute_interaction`](@ref).
 """
 function integrated_interaction end
 
-function integrated_interaction(x::Real, W, ys::AbstractVector{<:Real}, dens_diff::AbstractVector{<:Real}=diff(pwc_density(ys)))
+function integrated_interaction(x::Real, W::Function, ys::AbstractVector{<:Real}, dens_diff::AbstractVector{<:Real}=diff(pwc_density(ys)))
     # eachindex(dens_diff) == eachindex(ys) || throw(DimensionMismatch("`ys` and `dens_diff` must have the same indices"))
     # -sum(i -> (@inbounds W(x - ys[i]) * dens_diff[i]), eachindex(ys, dens_diff))
     -sum(p -> W(x - p[1]) * p[2], zip(ys, dens_diff))

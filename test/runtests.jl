@@ -3,6 +3,8 @@ using RecursiveArrayTools
 using Test
 using TestSetExtensions
 
+include("Aqua.jl")
+
 @testset ExtendedTestSet "ConservationLawsParticles.jl" begin
     @testset "densities" begin
         include("test_densities.jl")
