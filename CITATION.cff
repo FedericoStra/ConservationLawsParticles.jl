@@ -1,0 +1,46 @@
+cff-version: 1.2.0
+title: ConservationLawsParticles.jl
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Federico
+    family-names: Stra
+    email: stra.federico@gmail.com
+    affiliation: Politecnico di Torino
+    orcid: 'https://orcid.org/0000-0001-8151-1045'
+identifiers:
+  - type: doi
+    value: 10.1137/21M1462994
+    description: >-
+      Entropy solutions of mildly singular nonlocal scalar
+      conservation laws with congestion via deterministic
+      particle methods
+  - type: doi
+    value: 10.1007/s00526-024-02848-9
+    description: >-
+      Stability of quasi-entropy solutions of non-local
+      scalar conservation laws
+repository-code: >-
+  https://github.com/FedericoStra/ConservationLawsParticles.jl
+url: >-
+  https://federicostra.github.io/ConservationLawsParticles.jl
+abstract: >-
+  This package implements the deterministic particle schemes
+  to solve 1D conservation laws described in the article
+  "Entropy solutions of mildly singular nonlocal scalar
+  conservation laws with congestion via deterministic
+  particle methods", E. Radici, F. Stra, SIAM J. Math. Anal.
+  55.3 (2021),
+  https://epubs.siam.org/doi/10.1137/21M1462994,
+  https://arxiv.org/abs/2107.10760.
+keywords:
+  - conservation laws
+  - differential equation
+  - numerical method
+  - deterministic particle scheme
+  - Lagrangian discretization
+  - mathematical analysis
+  - numerical analysis
+license: MIT
