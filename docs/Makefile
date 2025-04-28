@@ -1,7 +1,13 @@
 PACKAGE := ConservationLawsParticles
 
-.PHONY: all
-all: makedocs
+
+.PHONY: default
+default: makedocs
+
+
+.PHONY: clean
+clean:
+	$(RM) -r build biblio/aux
 
 
 .PHONY: makedocs

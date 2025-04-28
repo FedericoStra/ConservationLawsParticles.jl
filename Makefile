@@ -1,5 +1,14 @@
+.PHONY: default
+default: test
+
+
 .PHONY: all
-all: test
+all: test makedocs
+
+
+.PHONY: clean
+clean:
+	$(MAKE) -C docs clean
 
 
 .PHONY: test
