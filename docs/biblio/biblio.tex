@@ -1,0 +1,37 @@
+\documentclass[a4paper,11pt,reqno]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[english]{babel}
+\usepackage{microtype}
+\usepackage{csquotes}
+
+% recommended order: biblatex -> hyperref -> geometry
+
+\usepackage[backend=biber,hyperref=true,style=alphabetic,giveninits=true,sorting=ynt]{biblatex}
+\addbibresource{biblio.bib}
+
+\usepackage{xcolor}
+\definecolor{midnightblue}{rgb}{0.1, 0.1, 0.44}
+\usepackage[colorlinks,allcolors=midnightblue]{hyperref}
+% \AtBeginDocument{\renewcommand{\sectionautorefname}{Section}}
+% \AtBeginDocument{\renewcommand{\subsectionautorefname}{Section}}
+% \AtBeginDocument{\renewcommand{\subsubsectionautorefname}{Section}}
+
+\usepackage[a4paper,hmargin=2.5cm,bottom=3cm,top=3cm,footskip=3\baselineskip,
+	marginparwidth=2.4cm,marginparsep=0.05cm]{geometry}
+
+\title{Bibliography}
+\author{Federico Stra}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+\nocite{*}
+
+\printbibliography
+
+\end{document}
