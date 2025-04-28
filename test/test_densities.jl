@@ -1,3 +1,6 @@
+using ConservationLawsParticles
+using RecursiveArrayTools
+
 @testset "pwc_density" begin
     # test a few specific examples
     @testset "examples" begin

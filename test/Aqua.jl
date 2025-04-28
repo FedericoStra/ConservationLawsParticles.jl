@@ -1,4 +1,4 @@
-@testset "Aqua tests" begin
-    import Aqua
-    Aqua.test_all(ConservationLawsParticles)
-end
+import ConservationLawsParticles
+import Aqua
+
+Aqua.test_all(ConservationLawsParticles)
