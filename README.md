@@ -73,3 +73,14 @@ The convergence rate of the scheme is studied (among other results) in the follo
 
 Please refer to the [documentation](https://federicostra.github.io/ConservationLawsParticles.jl)
 for additional ways to cite this work.
+
+## Example
+
+Particles trajectories and time evolution of the densities of two interacting species.
+
+<img src="examples/multi-spec-2.png" width="50%"><img src="examples/multi-spec-2.gif" width="50%">
+
+See the "Examples" section in the
+[stable](https://federicostra.github.io/ConservationLawsParticles.jl/stable/examples/)
+or [dev](https://federicostra.github.io/ConservationLawsParticles.jl/dev/examples/)
+documentation for more.
