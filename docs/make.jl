@@ -6,7 +6,7 @@ DocMeta.setdocmeta!(ConservationLawsParticles, :DocTestSetup, :(using Conservati
 makedocs(;
     modules=[ConservationLawsParticles],
     authors="Federico Stra <stra.federico@gmail.com> and contributors",
-    repo="https://github.com/FedericoStra/ConservationLawsParticles.jl/blob/{commit}{path}#{line}",
+    # repo="https://github.com/FedericoStra/ConservationLawsParticles.jl/blob/{commit}{path}#{line}",
     sitename="ConservationLawsParticles.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
