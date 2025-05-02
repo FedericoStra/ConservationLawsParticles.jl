@@ -7,9 +7,10 @@ using TestSetExtensions
     @safetestset "Aqua tests" include("Aqua.jl")
 
     @testset "ConservationLawsParticles.jl" begin
-        @safetestset "Densities"  include("test_densities.jl")
-        @safetestset "Velocities" include("test_velocities.jl")
-        @safetestset "Utils"      include("test_utils.jl")
+        @safetestset "Densities"    include("test_densities.jl")
+        @safetestset "Velocities"   include("test_velocities.jl")
+        @safetestset "PC functions" include("test_pcf.jl")
+        @safetestset "Utils"        include("test_utils.jl")
     end
 
 end
