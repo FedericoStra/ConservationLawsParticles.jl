@@ -6,6 +6,10 @@ struct PiecewiseConstantFunction{X,Y}
     values::Vector{Y}
 end
 
+function Base.:(==)(f::PiecewiseConstantFunction, g::PiecewiseConstantFunction)
+    return f.cuts == g.cuts && f.values == g.values
+end
+
 Base.map(f, pcf::PiecewiseConstantFunction) = PiecewiseConstantFunction(pcf.cuts, map(f, pcf.values))
 
 Base.abs(pcf::PiecewiseConstantFunction) = map(abs, pcf)
